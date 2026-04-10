@@ -45,6 +45,7 @@ class MenuLainFragment : Fragment(), View.OnClickListener {
             }
 
             R.id.cardUser -> {
+                startActivity(Intent(requireContext(), UserActivity::class.java))
             }
         }
     }

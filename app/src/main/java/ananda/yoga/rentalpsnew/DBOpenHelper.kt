@@ -388,6 +388,338 @@ fun insertProduk(nama: String, jenis: String, harga: Double, stock: Int): Boolea
         db.close()
         return list
     }
+
+
+//    kelola pengguna
+fun getAllUser(): ArrayList<HashMap<String, String>> {
+    val list = ArrayList<HashMap<String, String>>()
+    val db = readableDatabase
+    val cursor = db.rawQuery("SELECT * FROM user ORDER BY id_user DESC", null)
+
+    if (cursor.moveToFirst()) {
+        do {
+            val item = HashMap<String, String>()
+            item["id_user"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_user")).toString()
+            item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
+            item["email"] = cursor.getString(cursor.getColumnIndexOrThrow("email"))
+            item["no_hp"] = cursor.getString(cursor.getColumnIndexOrThrow("no_hp"))
+            item["password"] = cursor.getString(cursor.getColumnIndexOrThrow("password"))
+            item["role"] = cursor.getString(cursor.getColumnIndexOrThrow("role"))
+            list.add(item)
+        } while (cursor.moveToNext())
+    }
+
+    cursor.close()
+    db.close()
+    return list
+}
+
+    fun insertPengguna(nama: String, email: String, noHp: String, password: String, role: String): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nama", nama)
+        values.put("email", email)
+        values.put("no_hp", noHp)
+        values.put("password", password)
+        values.put("role", role)
+
+        val result = db.insert("user", null, values)
+        db.close()
+        return result != -1L
+    }
+
+    fun updatePengguna(
+        idUser: Int,
+        nama: String,
+        email: String,
+        noHp: String,
+        password: String,
+        role: String
+    ): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nama", nama)
+        values.put("email", email)
+        values.put("no_hp", noHp)
+        values.put("password", password)
+        values.put("role", role)
+
+        val result = db.update(
+            "user",
+            values,
+            "id_user = ?",
+            arrayOf(idUser.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun deletePengguna(idUser: Int): Boolean {
+        val db = writableDatabase
+        val result = db.delete(
+            "user",
+            "id_user = ?",
+            arrayOf(idUser.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun checkEmailUserLain(email: String, idUser: Int): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT * FROM user WHERE email = ? AND id_user != ?",
+            arrayOf(email, idUser.toString())
+        )
+
+        val ada = cursor.count > 0
+        cursor.close()
+        db.close()
+        return ada
+    }
+
+
+
+
+
+//    monitoring
+fun getMonitoringPs(): ArrayList<HashMap<String, String>> {
+    val list = ArrayList<HashMap<String, String>>()
+    val db = readableDatabase
+
+    val sql = """
+        SELECT 
+            p.id_ps,
+            p.nomor_ps,
+            p.status_ps,
+            t.nama_tipe,
+            dsp.jam_mulai,
+            dsp.jam_selesai,
+            tr.id_transaksi,
+            tr.status_transaksi
+        FROM playstation p
+        INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe
+        LEFT JOIN detail_sewa_ps dsp ON p.id_ps = dsp.id_ps
+        LEFT JOIN transaksi tr ON dsp.id_transaksi = tr.id_transaksi
+        ORDER BY p.id_ps ASC
+    """.trimIndent()
+
+    val cursor = db.rawQuery(sql, null)
+
+    if (cursor.moveToFirst()) {
+        do {
+            val item = HashMap<String, String>()
+            item["id_ps"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_ps")).toString()
+            item["nomor_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("nomor_ps"))
+            item["status_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("status_ps"))
+            item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
+
+            val jamMulaiIndex = cursor.getColumnIndex("jam_mulai")
+            val jamSelesaiIndex = cursor.getColumnIndex("jam_selesai")
+            val idTransaksiIndex = cursor.getColumnIndex("id_transaksi")
+            val statusTransaksiIndex = cursor.getColumnIndex("status_transaksi")
+
+            item["jam_mulai"] =
+                if (jamMulaiIndex >= 0 && !cursor.isNull(jamMulaiIndex)) cursor.getString(jamMulaiIndex) else ""
+
+            item["jam_selesai"] =
+                if (jamSelesaiIndex >= 0 && !cursor.isNull(jamSelesaiIndex)) cursor.getString(jamSelesaiIndex) else ""
+
+            item["id_transaksi"] =
+                if (idTransaksiIndex >= 0 && !cursor.isNull(idTransaksiIndex)) cursor.getInt(idTransaksiIndex).toString() else ""
+
+            item["status_transaksi"] =
+                if (statusTransaksiIndex >= 0 && !cursor.isNull(statusTransaksiIndex)) cursor.getString(statusTransaksiIndex) else ""
+
+            list.add(item)
+        } while (cursor.moveToNext())
+    }
+
+    cursor.close()
+    db.close()
+    return list
+}
+
+// transaksi
+fun insertTransaksi(
+    idUser: Int,
+    tanggal: String,
+    totalHarga: Double,
+    statusTransaksi: String
+): Long {
+    val db = writableDatabase
+    val values = ContentValues()
+    values.put("id_user", idUser)
+    values.put("tanggal", tanggal)
+    values.put("total_harga", totalHarga)
+    values.put("status_transaksi", statusTransaksi)
+
+    val result = db.insert("transaksi", null, values)
+    db.close()
+    return result
+}
+
+    fun insertDetailSewaPs(
+        idTransaksi: Long,
+        idPs: Int,
+        durasi: Int,
+        jamMulai: String,
+        jamSelesai: String,
+        typePs: String,
+        hargaPerJam: Double,
+        subtotal: Double
+    ): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("id_transaksi", idTransaksi)
+        values.put("id_ps", idPs)
+        values.put("durasi", durasi)
+        values.put("jam_mulai", jamMulai)
+        values.put("jam_selesai", jamSelesai)
+        values.put("type_ps", typePs)
+        values.put("harga_perjam", hargaPerJam)
+        values.put("subtotal", subtotal)
+
+        val result = db.insert("detail_sewa_ps", null, values)
+        db.close()
+        return result != -1L
+    }
+
+    fun insertDetailProduk(
+        idTransaksi: Long,
+        idProduk: Int,
+        qty: Int,
+        subtotal: Double
+    ): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("id_transaksi", idTransaksi)
+        values.put("id_produk", idProduk)
+        values.put("qty", qty)
+        values.put("subtotal", subtotal)
+
+        val result = db.insert("detail_produk", null, values)
+        db.close()
+        return result != -1L
+    }
+
+    fun getAllProdukSpinner(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM produk ORDER BY nama ASC", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = HashMap<String, String>()
+                item["id_produk"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_produk")).toString()
+                item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
+                item["jenis"] = cursor.getString(cursor.getColumnIndexOrThrow("jenis"))
+                item["harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga")).toString()
+                item["stock"] = cursor.getInt(cursor.getColumnIndexOrThrow("stock")).toString()
+                list.add(item)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+    fun getHargaSewaByNamaTipe(namaTipe: String): Double {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT harga_sewa FROM tipe_ps WHERE nama_tipe = ?",
+            arrayOf(namaTipe)
+        )
+
+        var harga = 0.0
+        if (cursor.moveToFirst()) {
+            harga = cursor.getDouble(cursor.getColumnIndexOrThrow("harga_sewa"))
+        }
+
+        cursor.close()
+        db.close()
+        return harga
+    }
+
+    fun updateStatusPs(idPs: Int, statusPs: String): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("status_ps", statusPs)
+
+        val result = db.update(
+            "playstation",
+            values,
+            "id_ps = ?",
+            arrayOf(idPs.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+
+//   riwayat
+fun getAllRiwayatTransaksi(): ArrayList<HashMap<String, String>> {
+    val list = ArrayList<HashMap<String, String>>()
+    val db = readableDatabase
+
+    val sql = """
+        SELECT 
+            tr.id_transaksi,
+            tr.tanggal,
+            tr.total_harga,
+            tr.status_transaksi,
+            p.nomor_ps,
+            dsp.jam_mulai,
+            dsp.jam_selesai,
+            dsp.durasi,
+            dsp.type_ps
+        FROM transaksi tr
+        LEFT JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi
+        LEFT JOIN playstation p ON dsp.id_ps = p.id_ps
+        ORDER BY tr.id_transaksi DESC
+    """.trimIndent()
+
+    val cursor = db.rawQuery(sql, null)
+
+    if (cursor.moveToFirst()) {
+        do {
+            val item = HashMap<String, String>()
+            item["id_transaksi"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_transaksi")).toString()
+            item["tanggal"] = cursor.getString(cursor.getColumnIndexOrThrow("tanggal"))
+            item["total_harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("total_harga")).toString()
+            item["status_transaksi"] = cursor.getString(cursor.getColumnIndexOrThrow("status_transaksi"))
+
+            val nomorPsIndex = cursor.getColumnIndex("nomor_ps")
+            val jamMulaiIndex = cursor.getColumnIndex("jam_mulai")
+            val jamSelesaiIndex = cursor.getColumnIndex("jam_selesai")
+            val durasiIndex = cursor.getColumnIndex("durasi")
+            val typePsIndex = cursor.getColumnIndex("type_ps")
+
+            item["nomor_ps"] =
+                if (nomorPsIndex >= 0 && !cursor.isNull(nomorPsIndex)) cursor.getString(nomorPsIndex) else "-"
+
+            item["jam_mulai"] =
+                if (jamMulaiIndex >= 0 && !cursor.isNull(jamMulaiIndex)) cursor.getString(jamMulaiIndex) else "-"
+
+            item["jam_selesai"] =
+                if (jamSelesaiIndex >= 0 && !cursor.isNull(jamSelesaiIndex)) cursor.getString(jamSelesaiIndex) else "-"
+
+            item["durasi"] =
+                if (durasiIndex >= 0 && !cursor.isNull(durasiIndex)) cursor.getInt(durasiIndex).toString() else "0"
+
+            item["type_ps"] =
+                if (typePsIndex >= 0 && !cursor.isNull(typePsIndex)) cursor.getString(typePsIndex) else "-"
+
+            list.add(item)
+        } while (cursor.moveToNext())
+    }
+
+    cursor.close()
+    db.close()
+    return list
+}
+
     companion object {
         private const val DB_NAME = "rental_ps.db"
         private const val DB_VERSION = 1
