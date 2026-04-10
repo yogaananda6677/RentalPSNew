@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/itemHome"
+        android:title="Home"
+        android:icon="@drawable/ic_home"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/itemProdi"
+        android:icon="@drawable/ic_list"
+        android:title="Prodi"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/itemMhs"
+        android:icon="@drawable/ic_person_add"
+        android:title="Mahasiswa"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/itemAbout"
+        android:icon="@drawable/ic_info"
+        android:title="About"
+        app:showAsAction="always" />
+
+</menu>

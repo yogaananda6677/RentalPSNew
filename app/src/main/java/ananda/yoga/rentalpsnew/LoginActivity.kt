@@ -1,4 +1,3 @@
-// LoginActivity.kt
 package ananda.yoga.rentalpsnew
 
 import ananda.yoga.rentalpsnew.databinding.ActivityLoginBinding
@@ -13,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 
 class LoginActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var b: ActivityLoginBinding
+    private lateinit var db: DBOpenHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +20,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
 
         b = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(b.root)
+
+        db = DBOpenHelper(this)
 
         ViewCompat.setOnApplyWindowInsetsListener(b.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -45,8 +47,17 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                     b.edtPassword.error = "Password tidak boleh kosong"
                     b.edtPassword.requestFocus()
                 } else {
-                    Toast.makeText(this, "Login berhasil (dummy)", Toast.LENGTH_SHORT).show()
-                    // startActivity(Intent(this, DashboardActivity::class.java))
+                    val loginBerhasil = db.checkLogin(email, password)
+
+                    if (loginBerhasil) {
+                        Toast.makeText(this, "Login berhasil", Toast.LENGTH_SHORT).show()
+
+                        // pindah ke dashboard
+                        startActivity(Intent(this, DashboardActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Email atau password salah", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
