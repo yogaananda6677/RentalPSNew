@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/itemHome"
         android:title="Home"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_home_24"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/itemProdi"
-        android:icon="@drawable/ic_list"
-        android:title="Prodi"
+        android:id="@+id/monitoring"
+        android:icon="@drawable/ic_monitoring_24"
+        android:title="Monitoring"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/itemMhs"
-        android:icon="@drawable/ic_person_add"
-        android:title="Mahasiswa"
+        android:id="@+id/riwayat"
+        android:icon="@drawable/ic_history_24"
+        android:title="Riwayat"
         app:showAsAction="always" />
     <item
-        android:id="@+id/itemAbout"
-        android:icon="@drawable/ic_info"
-        android:title="About"
+        android:id="@+id/menuLain"
+        android:icon="@drawable/ic_menu_24"
+        android:title="Menu Lain"
         app:showAsAction="always" />
 
 </menu>

@@ -174,6 +174,220 @@ class DBOpenHelper(context: Context) :
         return ada
     }
 
+//    CRUD TIPE PS
+    fun insertTipePs(namaTipe: String, hargaSewa: Double): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nama_tipe", namaTipe)
+        values.put("harga_sewa", hargaSewa)
+
+        val result = db.insert("tipe_ps", null, values)
+        db.close()
+        return result != -1L
+    }
+
+    fun updateTipePs(idTipe: Int, namaTipe: String, hargaSewa: Double): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nama_tipe", namaTipe)
+        values.put("harga_sewa", hargaSewa)
+
+        val result = db.update(
+            "tipe_ps",
+            values,
+            "id_tipe = ?",
+            arrayOf(idTipe.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun deleteTipePs(idTipe: Int): Boolean {
+        val db = writableDatabase
+        val result = db.delete(
+            "tipe_ps",
+            "id_tipe = ?",
+            arrayOf(idTipe.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun getAllTipePs(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM tipe_ps ORDER BY id_tipe DESC", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = HashMap<String, String>()
+                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
+                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
+                item["harga_sewa"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga_sewa")).toString()
+                list.add(item)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+//    kelola data ps
+fun insertPlaystation(nomorPs: String, idTipe: Int, statusPs: String): Boolean {
+    val db = writableDatabase
+    val values = ContentValues()
+    values.put("nomor_ps", nomorPs)
+    values.put("id_tipe", idTipe)
+    values.put("status_ps", statusPs)
+
+    val result = db.insert("playstation", null, values)
+    db.close()
+    return result != -1L
+}
+
+    fun updatePlaystation(idPs: Int, nomorPs: String, idTipe: Int, statusPs: String): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nomor_ps", nomorPs)
+        values.put("id_tipe", idTipe)
+        values.put("status_ps", statusPs)
+
+        val result = db.update(
+            "playstation",
+            values,
+            "id_ps = ?",
+            arrayOf(idPs.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun deletePlaystation(idPs: Int): Boolean {
+        val db = writableDatabase
+        val result = db.delete(
+            "playstation",
+            "id_ps = ?",
+            arrayOf(idPs.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun getAllPlaystation(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val db = readableDatabase
+
+        val sql = """
+        SELECT p.id_ps, p.nomor_ps, p.id_tipe, p.status_ps, t.nama_tipe
+        FROM playstation p
+        INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe
+        ORDER BY p.id_ps DESC
+    """.trimIndent()
+
+        val cursor = db.rawQuery(sql, null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = HashMap<String, String>()
+                item["id_ps"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_ps")).toString()
+                item["nomor_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("nomor_ps"))
+                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
+                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
+                item["status_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("status_ps"))
+                list.add(item)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+    fun getAllTipePsForSpinner(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM tipe_ps ORDER BY nama_tipe ASC", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = HashMap<String, String>()
+                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
+                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
+                list.add(item)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+
+//    kelola produk
+fun insertProduk(nama: String, jenis: String, harga: Double, stock: Int): Boolean {
+    val db = writableDatabase
+    val values = ContentValues()
+    values.put("nama", nama)
+    values.put("jenis", jenis)
+    values.put("harga", harga)
+    values.put("stock", stock)
+
+    val result = db.insert("produk", null, values)
+    db.close()
+    return result != -1L
+}
+
+    fun updateProduk(idProduk: Int, nama: String, jenis: String, harga: Double, stock: Int): Boolean {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("nama", nama)
+        values.put("jenis", jenis)
+        values.put("harga", harga)
+        values.put("stock", stock)
+
+        val result = db.update(
+            "produk",
+            values,
+            "id_produk = ?",
+            arrayOf(idProduk.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun deleteProduk(idProduk: Int): Boolean {
+        val db = writableDatabase
+        val result = db.delete(
+            "produk",
+            "id_produk = ?",
+            arrayOf(idProduk.toString())
+        )
+        db.close()
+        return result > 0
+    }
+
+    fun getAllProduk(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM produk ORDER BY id_produk DESC", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val item = HashMap<String, String>()
+                item["id_produk"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_produk")).toString()
+                item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
+                item["jenis"] = cursor.getString(cursor.getColumnIndexOrThrow("jenis"))
+                item["harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga")).toString()
+                item["stock"] = cursor.getInt(cursor.getColumnIndexOrThrow("stock")).toString()
+                list.add(item)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
     companion object {
         private const val DB_NAME = "rental_ps.db"
         private const val DB_VERSION = 1

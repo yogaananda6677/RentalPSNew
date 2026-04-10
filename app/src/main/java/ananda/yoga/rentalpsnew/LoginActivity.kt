@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                         Toast.makeText(this, "Login berhasil", Toast.LENGTH_SHORT).show()
 
                         // pindah ke dashboard
-                        startActivity(Intent(this, DashboardActivity::class.java))
+                        startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     } else {
                         Toast.makeText(this, "Email atau password salah", Toast.LENGTH_SHORT).show()

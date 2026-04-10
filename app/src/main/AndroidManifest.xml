@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.Light.NoActionBar">
         <activity
+            android:name=".ProdukActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PlaystationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TipePsActivity"
+            android:exported="false" />
+        <activity
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity
