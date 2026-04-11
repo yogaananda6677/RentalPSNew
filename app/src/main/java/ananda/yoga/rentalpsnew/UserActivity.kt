@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityUserBinding
+import android.widget.TextView
 
 class UserActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -90,14 +91,29 @@ class UserActivity : AppCompatActivity(), View.OnClickListener {
         val adapter = SimpleAdapter(
             this,
             listData,
-            android.R.layout.simple_list_item_2,
-            arrayOf("nama", "email"),
-            intArrayOf(android.R.id.text1, android.R.id.text2)
+            R.layout.item_user_list, // Gunakan layout kustom tadi
+            arrayOf("nama", "email", "role"),
+            intArrayOf(R.id.text1, R.id.text2, R.id.tvRoleBadge)
         )
 
+        adapter.setViewBinder { view, data, _ ->
+            if (view.id == R.id.tvRoleBadge) {
+                val role = data.toString().lowercase()
+                val tv = view as TextView
+                tv.text = role.uppercase()
+                if (role == "admin") {
+                    tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
+                } else {
+                    tv.setTextColor(android.graphics.Color.parseColor("#64748B"))
+                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#F1F5F9"))
+                }
+                return@setViewBinder true
+            }
+            false
+        }
         b.listView.adapter = adapter
     }
-
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_user, null)
         val edtNama = view.findViewById<EditText>(R.id.edtNamaUser)

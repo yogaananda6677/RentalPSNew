@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.SimpleAdapter
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -82,16 +83,44 @@ class PlaystationActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    // --- FUNGSI TAMPIL DATA (DENGAN GARIS & WARNA BADGE) ---
     private fun tampilData() {
         listData = db.getAllPlaystation()
 
+        // Pastikan "status_ps" ada di daftar keys agar setViewBinder bisa membacanya
         val adapter = SimpleAdapter(
             this,
             listData,
-            android.R.layout.simple_list_item_2,
-            arrayOf("nomor_ps", "nama_tipe"),
-            intArrayOf(android.R.id.text1, android.R.id.text2)
+            R.layout.item_playstation, // Menggunakan layout kustom dengan garis pembatas
+            arrayOf("nomor_ps", "nama_tipe", "status_ps"),
+            intArrayOf(R.id.text1, R.id.text2, R.id.tvStatusBadge)
         )
+
+        // Logika pewarnaan Badge secara dinamis
+        adapter.setViewBinder { view, data, _ ->
+            if (view.id == R.id.tvStatusBadge) {
+                val status = data.toString().lowercase()
+                val tv = view as TextView
+                tv.text = status.uppercase()
+
+                when (status) {
+                    "tersedia" -> {
+                        tv.setTextColor(android.graphics.Color.parseColor("#16A34A"))
+                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DCFCE7"))
+                    }
+                    "dipakai" -> {
+                        tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
+                    }
+                    "maintenance" -> {
+                        tv.setTextColor(android.graphics.Color.parseColor("#EA580C"))
+                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF7ED"))
+                    }
+                }
+                return@setViewBinder true
+            }
+            false
+        }
 
         b.listView.adapter = adapter
     }
@@ -124,7 +153,7 @@ class PlaystationActivity : AppCompatActivity(), View.OnClickListener {
             .setPositiveButton("Simpan") { _, _ ->
                 val nomorPs = edtNomorPs.text.toString().trim()
                 val posisiTipe = spTipe.selectedItemPosition
-                val idTipe = listTipe[posisiTipe]["id_tipe"]!!.toInt()
+                val idTipe = if (listTipe.isNotEmpty()) listTipe[posisiTipe]["id_tipe"]!!.toInt() else 0
                 val statusPs = spStatus.selectedItem.toString()
 
                 if (nomorPs.isNotEmpty()) {
@@ -187,7 +216,7 @@ class PlaystationActivity : AppCompatActivity(), View.OnClickListener {
             .setPositiveButton("Update") { _, _ ->
                 val nomorPs = edtNomorPs.text.toString().trim()
                 val posisiTipe = spTipe.selectedItemPosition
-                val idTipe = listTipe[posisiTipe]["id_tipe"]!!.toInt()
+                val idTipe = if (listTipe.isNotEmpty()) listTipe[posisiTipe]["id_tipe"]!!.toInt() else 0
                 val statusPs = spStatus.selectedItem.toString()
 
                 if (nomorPs.isNotEmpty()) {

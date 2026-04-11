@@ -3,18 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F8FF">
+    android:background="#F8FAFC">
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-black"
         android:text="Riwayat Transaksi"
         android:textColor="#0F172A"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textSize="28sp"
+        android:letterSpacing="-0.02"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Belum ada riwayat transaksi"
-        android:textColor="#64748B"
+        android:textColor="#94A3B8"
         android:textSize="14sp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
@@ -36,9 +37,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="100dp"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,45 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/edtNamaProduk"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_edittext_modern"
-        android:hint="Nama produk"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <Spinner
-        android:id="@+id/spJenisProduk"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="12dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NAMA ITEM"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#64748B"
+            android:letterSpacing="0.1"/>
 
-    <EditText
-        android:id="@+id/edtHargaProduk"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_edittext_modern"
-        android:hint="Harga"
-        android:inputType="numberDecimal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
+        <EditText
+            android:id="@+id/edtNamaProduk"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_edittext_modern"
+            android:hint="Contoh: Coca Cola"
+            android:paddingStart="16dp"
+            android:textSize="15sp" />
 
-    <EditText
-        android:id="@+id/edtStockProduk"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/bg_edittext_modern"
-        android:hint="Stock"
-        android:inputType="number"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KATEGORI"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#64748B"
+            android:letterSpacing="0.1"/>
 
-</LinearLayout>
+        <Spinner
+            android:id="@+id/spJenisProduk"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_edittext_modern" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HARGA (RP)"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B" />
+
+                <EditText
+                    android:id="@+id/edtHargaProduk"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_edittext_modern"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:paddingStart="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STOK"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B" />
+
+                <EditText
+                    android:id="@+id/edtStockProduk"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_edittext_modern"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:paddingStart="16dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

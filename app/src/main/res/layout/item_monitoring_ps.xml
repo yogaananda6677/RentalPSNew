@@ -3,14 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardPs"
     android:layout_width="match_parent"
-    android:layout_height="170dp"
-    android:layout_margin="8dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="4dp">
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -18,49 +19,64 @@
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge_status"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
             android:text="TERSEDIA"
-            android:textSize="12sp"
+            android:textAllCaps="true"
+            android:textSize="10sp"
             android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/ivIconPs"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/ic_gamepad"
+            app:tint="#2563EB" />
 
         <TextView
             android:id="@+id/tvNomorPs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="A01"
+            android:layout_marginTop="8dp"
+            android:text="PS-01"
             android:textColor="#0F172A"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvTipePs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="PS4 - STANDARD"
-            android:textColor="#334155"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:text="PS4"
+            android:textColor="#64748B"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="12dp"
+            android:background="#F1F5F9" />
 
         <TextView
             android:id="@+id/tvJamSelesai"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:text="Selesai: -"
-            android:textColor="#475569"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textColor="#94A3B8"
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/tvCountdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Belum ada transaksi aktif"
-            android:textColor="#64748B"
-            android:textSize="12sp" />
+            android:layout_marginTop="2dp"
+            android:text="00:00:00"
+            android:textColor="#1D4ED8"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

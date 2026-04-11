@@ -133,7 +133,64 @@ class DBOpenHelper(context: Context) :
         db?.execSQL("DROP TABLE IF EXISTS user")
         onCreate(db)
     }
+    fun selesaiTransaksiByPs(idPs: Int): Boolean {
+        val db = writableDatabase
+        var berhasil = false
 
+        try {
+            db.beginTransaction()
+
+            val cursor = db.rawQuery(
+                """
+            SELECT tr.id_transaksi
+            FROM transaksi tr
+            INNER JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi
+            WHERE dsp.id_ps = ? AND tr.status_transaksi = 'aktif'
+            ORDER BY tr.id_transaksi DESC
+            LIMIT 1
+            """.trimIndent(),
+                arrayOf(idPs.toString())
+            )
+
+            var idTransaksi = -1
+            if (cursor.moveToFirst()) {
+                idTransaksi = cursor.getInt(cursor.getColumnIndexOrThrow("id_transaksi"))
+            }
+            cursor.close()
+
+            if (idTransaksi != -1) {
+                val valuesTransaksi = android.content.ContentValues()
+                valuesTransaksi.put("status_transaksi", "selesai")
+
+                db.update(
+                    "transaksi",
+                    valuesTransaksi,
+                    "id_transaksi = ?",
+                    arrayOf(idTransaksi.toString())
+                )
+            }
+
+            val valuesPs = android.content.ContentValues()
+            valuesPs.put("status_ps", "tersedia")
+
+            db.update(
+                "playstation",
+                valuesPs,
+                "id_ps = ?",
+                arrayOf(idPs.toString())
+            )
+
+            db.setTransactionSuccessful()
+            berhasil = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            db.endTransaction()
+            db.close()
+        }
+
+        return berhasil
+    }
     fun insertUser(nama: String, email: String, noHp: String, password: String, role: String = "customer"): Boolean {
         val db = writableDatabase
         val values = ContentValues()

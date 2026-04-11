@@ -39,22 +39,21 @@ class RiwayatAdapter(
         holder.b.tvTotal.text = "Rp $totalHarga"
         holder.b.tvStatus.text = status.replaceFirstChar { it.uppercase() }
 
-        when (status) {
+        when (status.lowercase()) {
             "aktif" -> {
-                holder.b.cardRiwayat.setCardBackgroundColor(Color.parseColor("#EFF6FF"))
-                holder.b.tvStatus.setTextColor(Color.parseColor("#2563EB"))
+                holder.b.tvStatus.text = "Berjalan"
+                holder.b.tvStatus.setTextColor(Color.parseColor("#2563EB")) // Blue
+                holder.b.tvStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#EFF6FF"))
             }
             "selesai" -> {
-                holder.b.cardRiwayat.setCardBackgroundColor(Color.parseColor("#F0FDF4"))
-                holder.b.tvStatus.setTextColor(Color.parseColor("#16A34A"))
+                holder.b.tvStatus.text = "Selesai"
+                holder.b.tvStatus.setTextColor(Color.parseColor("#16A34A")) // Green
+                holder.b.tvStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#DCFCE7"))
             }
             "batal" -> {
-                holder.b.cardRiwayat.setCardBackgroundColor(Color.parseColor("#FEF2F2"))
-                holder.b.tvStatus.setTextColor(Color.parseColor("#DC2626"))
-            }
-            else -> {
-                holder.b.cardRiwayat.setCardBackgroundColor(Color.parseColor("#F8FAFC"))
-                holder.b.tvStatus.setTextColor(Color.parseColor("#64748B"))
+                holder.b.tvStatus.text = "Dibatalkan"
+                holder.b.tvStatus.setTextColor(Color.parseColor("#EF4444")) // Red
+                holder.b.tvStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#FEF2F2"))
             }
         }
     }

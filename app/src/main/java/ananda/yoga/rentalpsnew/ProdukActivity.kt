@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityProdukBinding
+import android.widget.TextView
 
 class ProdukActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -89,14 +90,38 @@ class ProdukActivity : AppCompatActivity(), View.OnClickListener {
         val adapter = SimpleAdapter(
             this,
             listData,
-            android.R.layout.simple_list_item_2,
-            arrayOf("nama", "jenis"),
-            intArrayOf(android.R.id.text1, android.R.id.text2)
+            R.layout.item_produk,
+            arrayOf("nama", "harga", "jenis"),
+            intArrayOf(R.id.text1, R.id.text2, R.id.tvJenisBadge)
         )
 
+        adapter.setViewBinder { view, data, _ ->
+            if (view.id == R.id.text2) {
+                // Gabungkan Harga dan Stok untuk sub-text
+                val index = listData.indexOfFirst { it["harga"] == data.toString() }
+                val stok = listData[index]["stock"]
+                val tv = view as TextView
+                tv.text = "Rp ${data} | Stok: $stok"
+                return@setViewBinder true
+            }
+
+            if (view.id == R.id.tvJenisBadge) {
+                val jenis = data.toString().lowercase()
+                val tv = view as TextView
+                tv.text = jenis.uppercase()
+                if (jenis == "makanan") {
+                    tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
+                } else {
+                    tv.setTextColor(android.graphics.Color.parseColor("#EA580C"))
+                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF7ED"))
+                }
+                return@setViewBinder true
+            }
+            false
+        }
         b.listView.adapter = adapter
     }
-
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_produk, null)
         val edtNama = view.findViewById<EditText>(R.id.edtNamaProduk)

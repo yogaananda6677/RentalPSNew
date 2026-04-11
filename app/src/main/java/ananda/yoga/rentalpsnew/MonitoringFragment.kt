@@ -29,7 +29,7 @@ class MonitoringFragment : Fragment() {
         db = DBOpenHelper(requireContext())
 
         b.rvMonitoring.layoutManager = GridLayoutManager(requireContext(), 2)
-
+        b.rvMonitoring.setHasFixedSize(true) // Tambahkan ini biar lebih stabil ukurannya
         tampilData()
     }
 
@@ -40,6 +40,9 @@ class MonitoringFragment : Fragment() {
 
     private fun tampilData() {
         listData = db.getMonitoringPs()
+        val totalUnit = listData.size
+        val unitDipakai = listData.count { it["status_ps"] == "dipakai" }
+        b.tvTotalAktif.text = "$totalUnit Unit"
         b.rvMonitoring.adapter = MonitoringAdapter(requireContext(), listData)
     }
 

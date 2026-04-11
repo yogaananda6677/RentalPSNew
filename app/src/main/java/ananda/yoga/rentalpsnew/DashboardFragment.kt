@@ -37,58 +37,67 @@ class DashboardFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.ivMenu -> {
-                Toast.makeText(requireContext(), "MEnu", Toast.LENGTH_SHORT).show()
-            }
-//                val popupMenu = PopupMenu(requireContext(), b.ivMenu)
-//                popupMenu.menuInflater.inflate(R.menu.menu_dashboard_admin, popupMenu.menu)
 
-//                popupMenu.setOnMenuItemClickListener { item ->
-//                    when (item.itemId) {
-//                        R.id.menu_profile -> {
-//                            Toast.makeText(requireContext(), "Profile Admin", Toast.LENGTH_SHORT).show()
-//                            true
-//                        }
-//
-//                        R.id.menu_tentang -> {
-//                            Toast.makeText(requireContext(), "Aplikasi Rental PS Admin", Toast.LENGTH_SHORT).show()
-//                            true
-//                        }
-//
-//                        R.id.menu_logout -> {
-//                            startActivity(Intent(requireContext(), LoginActivity::class.java))
-//                            requireActivity().finish()
-//                            true
-//                        }
-//
-//                        else -> false
-//                    }
-//                }
-//                popupMenu.show()
-//            }
+            R.id.ivMenu -> {
+                val popupMenu = PopupMenu(requireContext(), b.ivMenu)
+                popupMenu.menuInflater.inflate(R.menu.menu_dashboard_admin, popupMenu.menu)
+
+                popupMenu.setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.menu_profile -> {
+                            Toast.makeText(requireContext(), "Profile Admin", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+
+                        R.id.menu_tentang -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Aplikasi Rental PS Admin",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            true
+                        }
+
+                        R.id.menu_logout -> {
+                            startActivity(Intent(requireContext(), LoginActivity::class.java))
+                            requireActivity().finish()
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+
+                popupMenu.show()
+            }
 
             R.id.cardUser -> {
-                Toast.makeText(requireContext(), "Data User", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(requireContext(), UserActivity::class.java))
             }
 
             R.id.cardPlaystation -> {
-                Toast.makeText(requireContext(), "Data Playstation", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(requireContext(), PlaystationActivity::class.java))
             }
 
             R.id.cardProduk -> {
-                Toast.makeText(requireContext(), "Data Produk", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(requireContext(), ProdukActivity::class.java))
             }
 
             R.id.cardTransaksi -> {
-                Toast.makeText(requireContext(), "Data Transaksi", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout, MonitoringFragment())
+                    .commit()
             }
 
             R.id.cardPembayaran -> {
-                Toast.makeText(requireContext(), "Data Pembayaran", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Menu Pembayaran belum dibuat", Toast.LENGTH_SHORT)
+                    .show()
             }
 
             R.id.cardLaporan -> {
-                Toast.makeText(requireContext(), "Data Laporan", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout, RiwayatFragment())
+                    .commit()
             }
         }
     }
