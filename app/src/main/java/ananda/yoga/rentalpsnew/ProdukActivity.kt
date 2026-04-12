@@ -2,21 +2,17 @@ package ananda.yoga.rentalpsnew
 
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.SimpleAdapter
-import android.widget.Spinner
-import android.widget.ArrayAdapter
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityProdukBinding
-import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import java.text.NumberFormat
+import java.util.Locale
 
-class ProdukActivity : AppCompatActivity(), View.OnClickListener {
+class ProdukActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityProdukBinding
     private lateinit var db: DBOpenHelper
@@ -25,7 +21,6 @@ class ProdukActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         b = ActivityProdukBinding.inflate(layoutInflater)
         setContentView(b.root)
 
@@ -37,90 +32,70 @@ class ProdukActivity : AppCompatActivity(), View.OnClickListener {
             insets
         }
 
-        b.ivBack.setOnClickListener(this)
-        b.btnTambah.setOnClickListener(this)
+        b.ivBack.setOnClickListener { finish() }
+        b.btnTambah.setOnClickListener { showDialogTambah() }
 
         tampilData()
-
-        b.listView.setOnItemClickListener { _, _, position, _ ->
-            val item = listData[position]
-            showDialogEdit(
-                item["id_produk"]!!.toInt(),
-                item["nama"].toString(),
-                item["jenis"].toString(),
-                item["harga"].toString(),
-                item["stock"].toString()
-            )
-        }
-
-        b.listView.onItemLongClickListener =
-            AdapterView.OnItemLongClickListener { _, _, position, _ ->
-                val item = listData[position]
-                val id = item["id_produk"]!!.toInt()
-
-                AlertDialog.Builder(this)
-                    .setTitle("Hapus Data")
-                    .setMessage("Yakin ingin menghapus produk ini?")
-                    .setPositiveButton("Ya") { _, _ ->
-                        val hasil = db.deleteProduk(id)
-                        if (hasil) {
-                            Toast.makeText(this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show()
-                            tampilData()
-                        } else {
-                            Toast.makeText(this, "Data gagal dihapus", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .setNegativeButton("Batal", null)
-                    .show()
-
-                true
-            }
-    }
-
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.ivBack -> finish()
-            R.id.btnTambah -> showDialogTambah()
-        }
     }
 
     private fun tampilData() {
-        listData = db.getAllProduk()
+        try {
+            listData = db.getAllProduk()
 
-        val adapter = SimpleAdapter(
-            this,
-            listData,
-            R.layout.item_produk,
-            arrayOf("nama", "harga", "jenis"),
-            intArrayOf(R.id.text1, R.id.text2, R.id.tvJenisBadge)
-        )
+            val adapter = SimpleAdapter(
+                this, listData, R.layout.item_produk,
+                // Kita petakan harga ke text2 saja, stok nanti kita ambil manual di ViewBinder
+                arrayOf("nama", "jenis", "harga", "id_produk"),
+                intArrayOf(R.id.text1, R.id.tvJenisBadge, R.id.text2, R.id.btnMenuProduk)
+            )
 
-        adapter.setViewBinder { view, data, _ ->
-            if (view.id == R.id.text2) {
-                // Gabungkan Harga dan Stok untuk sub-text
-                val index = listData.indexOfFirst { it["harga"] == data.toString() }
-                val stok = listData[index]["stock"]
-                val tv = view as TextView
-                tv.text = "Rp ${data} | Stok: $stok"
-                return@setViewBinder true
-            }
+            adapter.viewBinder = SimpleAdapter.ViewBinder { view, data, _ ->
+                when (view.id) {
+                    R.id.text2 -> {
+                        val tv = view as TextView
+                        val pos = b.listView.getPositionForView(view)
 
-            if (view.id == R.id.tvJenisBadge) {
-                val jenis = data.toString().lowercase()
-                val tv = view as TextView
-                tv.text = jenis.uppercase()
-                if (jenis == "makanan") {
-                    tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
-                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
-                } else {
-                    tv.setTextColor(android.graphics.Color.parseColor("#EA580C"))
-                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF7ED"))
+                        // CEK POSISI: Jika tidak valid (-1), jangan diproses agar tidak FC
+                        if (pos != AdapterView.INVALID_POSITION && pos < listData.size) {
+                            val item = listData[pos]
+                            val hargaRaw = item["harga"]?.toDoubleOrNull() ?: 0.0
+                            val stok = item["stock"] ?: "0"
+
+                            val localeID = Locale("in", "ID")
+                            val formatter = NumberFormat.getCurrencyInstance(localeID)
+                            formatter.maximumFractionDigits = 0
+
+                            tv.text = "${formatter.format(hargaRaw)} | Stok: $stok"
+                        }
+                        true
+                    }
+                    R.id.btnMenuProduk -> {
+                        val btn = view as ImageButton
+                        val idProduk = data.toString()
+                        btn.setOnClickListener { v ->
+                            val popup = PopupMenu(this, v)
+                            popup.menu.add("Edit")
+                            popup.menu.add("Hapus")
+                            popup.setOnMenuItemClickListener { menu ->
+                                val item = listData.find { it["id_produk"] == idProduk }
+                                if (item != null) {
+                                    if (menu.title == "Edit") showDialogEdit(item)
+                                    else confirmHapusProduk(item)
+                                }
+                                true
+                            }
+                            popup.show()
+                        }
+                        true
+                    }
+                    else -> false
                 }
-                return@setViewBinder true
             }
-            false
+            b.listView.adapter = adapter
+        } catch (e: Exception) {
+            // Jika ada error, munculkan pesan agar kita tahu masalahnya di mana
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        b.listView.adapter = adapter
     }
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_produk, null)
@@ -130,92 +105,70 @@ class ProdukActivity : AppCompatActivity(), View.OnClickListener {
         val edtStock = view.findViewById<EditText>(R.id.edtStockProduk)
 
         val jenisList = arrayOf("Makanan", "Minuman", "Snack", "Lainnya")
-        val adapterJenis = ArrayAdapter(this, android.R.layout.simple_spinner_item, jenisList)
-        adapterJenis.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spJenis.adapter = adapterJenis
+        spJenis.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, jenisList)
 
         AlertDialog.Builder(this)
             .setTitle("Tambah Produk")
             .setView(view)
             .setPositiveButton("Simpan") { _, _ ->
-                val nama = edtNama.text.toString().trim()
+                val nama = edtNama.text.toString()
                 val jenis = spJenis.selectedItem.toString()
-                val harga = edtHarga.text.toString().trim()
-                val stock = edtStock.text.toString().trim()
+                val harga = edtHarga.text.toString()
+                val stock = edtStock.text.toString()
 
-                if (nama.isEmpty()) {
-                    Toast.makeText(this, "Nama produk tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (harga.isEmpty()) {
-                    Toast.makeText(this, "Harga tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (stock.isEmpty()) {
-                    Toast.makeText(this, "Stock tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else {
-                    val hasil = db.insertProduk(nama, jenis, harga.toDouble(), stock.toInt())
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil ditambah", Toast.LENGTH_SHORT).show()
+                if (nama.isNotEmpty() && harga.isNotEmpty()) {
+                    if (db.insertProduk(nama, jenis, harga.toDouble(), stock.toInt())) {
+                        Toast.makeText(this, "Produk ditambahkan", Toast.LENGTH_SHORT).show()
                         tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal ditambah", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton("Batal", null).show()
     }
 
-    private fun showDialogEdit(
-        idProduk: Int,
-        namaLama: String,
-        jenisLama: String,
-        hargaLama: String,
-        stockLama: String
-    ) {
+    private fun showDialogEdit(item: HashMap<String, String>) {
         val view = layoutInflater.inflate(R.layout.dialog_produk, null)
         val edtNama = view.findViewById<EditText>(R.id.edtNamaProduk)
         val spJenis = view.findViewById<Spinner>(R.id.spJenisProduk)
         val edtHarga = view.findViewById<EditText>(R.id.edtHargaProduk)
         val edtStock = view.findViewById<EditText>(R.id.edtStockProduk)
 
-        edtNama.setText(namaLama)
-        edtHarga.setText(hargaLama)
-        edtStock.setText(stockLama)
+        // Set data lama (hilangkan .0 di inputan agar user tidak bingung)
+        edtNama.setText(item["nama"])
+        val hargaBulat = item["harga"]?.toDoubleOrNull()?.toLong()?.toString() ?: "0"
+        edtHarga.setText(hargaBulat)
+        edtStock.setText(item["stock"])
 
         val jenisList = arrayOf("Makanan", "Minuman", "Snack", "Lainnya")
-        val adapterJenis = ArrayAdapter(this, android.R.layout.simple_spinner_item, jenisList)
-        adapterJenis.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spJenis.adapter = adapterJenis
-
-        val posisiJenis = jenisList.indexOf(jenisLama)
-        if (posisiJenis >= 0) {
-            spJenis.setSelection(posisiJenis)
-        }
+        spJenis.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, jenisList)
+        val pos = jenisList.indexOf(item["jenis"])
+        if (pos >= 0) spJenis.setSelection(pos)
 
         AlertDialog.Builder(this)
             .setTitle("Edit Produk")
             .setView(view)
             .setPositiveButton("Update") { _, _ ->
-                val nama = edtNama.text.toString().trim()
-                val jenis = spJenis.selectedItem.toString()
-                val harga = edtHarga.text.toString().trim()
-                val stock = edtStock.text.toString().trim()
+                val id = item["id_produk"]!!.toInt()
+                val hrg = edtHarga.text.toString().toDoubleOrNull() ?: 0.0
+                val stk = edtStock.text.toString().toIntOrNull() ?: 0
 
-                if (nama.isEmpty()) {
-                    Toast.makeText(this, "Nama produk tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (harga.isEmpty()) {
-                    Toast.makeText(this, "Harga tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (stock.isEmpty()) {
-                    Toast.makeText(this, "Stock tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else {
-                    val hasil = db.updateProduk(idProduk, nama, jenis, harga.toDouble(), stock.toInt())
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil diupdate", Toast.LENGTH_SHORT).show()
-                        tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal diupdate", Toast.LENGTH_SHORT).show()
-                    }
+                if (db.updateProduk(id, edtNama.text.toString(), spJenis.selectedItem.toString(), hrg, stk)) {
+                    Toast.makeText(this, "Data diperbarui", Toast.LENGTH_SHORT).show()
+                    tampilData()
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton("Batal", null).show()
+    }
+
+    private fun confirmHapusProduk(item: HashMap<String, String>) {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus Produk")
+            .setMessage("Yakin ingin menghapus ${item["nama"]}?")
+            .setPositiveButton("Hapus") { _, _ ->
+                if (db.deleteProduk(item["id_produk"]!!.toInt())) {
+                    Toast.makeText(this, "Produk berhasil dihapus", Toast.LENGTH_SHORT).show()
+                    tampilData()
+                }
+            }.setNegativeButton("Batal", null).show()
     }
 }

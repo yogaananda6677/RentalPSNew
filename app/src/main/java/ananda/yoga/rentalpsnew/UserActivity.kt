@@ -1,22 +1,17 @@
 package ananda.yoga.rentalpsnew
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.SimpleAdapter
-import android.widget.Spinner
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityUserBinding
-import android.widget.TextView
 
-class UserActivity : AppCompatActivity(), View.OnClickListener {
+class UserActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityUserBinding
     private lateinit var db: DBOpenHelper
@@ -24,8 +19,6 @@ class UserActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         b = ActivityUserBinding.inflate(layoutInflater)
         setContentView(b.root)
 
@@ -37,191 +30,150 @@ class UserActivity : AppCompatActivity(), View.OnClickListener {
             insets
         }
 
-        b.ivBack.setOnClickListener(this)
-        b.btnTambah.setOnClickListener(this)
+        b.ivBack.setOnClickListener { finish() }
+        b.btnTambah.setOnClickListener { showDialogTambah() }
 
         tampilData()
-
-        b.listView.setOnItemClickListener { _, _, position, _ ->
-            val item = listData[position]
-            showDialogEdit(
-                item["id_user"]!!.toInt(),
-                item["nama"].toString(),
-                item["email"].toString(),
-                item["no_hp"].toString(),
-                item["password"].toString(),
-                item["role"].toString()
-            )
-        }
-
-        b.listView.onItemLongClickListener =
-            AdapterView.OnItemLongClickListener { _, _, position, _ ->
-                val item = listData[position]
-                val idUser = item["id_user"]!!.toInt()
-
-                AlertDialog.Builder(this)
-                    .setTitle("Hapus Data")
-                    .setMessage("Yakin ingin menghapus pengguna ini?")
-                    .setPositiveButton("Ya") { _, _ ->
-                        val hasil = db.deletePengguna(idUser)
-                        if (hasil) {
-                            Toast.makeText(this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show()
-                            tampilData()
-                        } else {
-                            Toast.makeText(this, "Data gagal dihapus", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .setNegativeButton("Batal", null)
-                    .show()
-
-                true
-            }
-    }
-
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.ivBack -> finish()
-            R.id.btnTambah -> showDialogTambah()
-        }
     }
 
     private fun tampilData() {
-        listData = db.getAllUser()
+        try {
+            listData = db.getAllUser()
 
-        val adapter = SimpleAdapter(
-            this,
-            listData,
-            R.layout.item_user_list, // Gunakan layout kustom tadi
-            arrayOf("nama", "email", "role"),
-            intArrayOf(R.id.text1, R.id.text2, R.id.tvRoleBadge)
-        )
+            val adapter = SimpleAdapter(
+                this, listData, R.layout.item_user,
+                arrayOf("nama", "email", "role", "id_user"),
+                intArrayOf(R.id.text1, R.id.text2, R.id.tvLevelBadge, R.id.btnMenuUser)
+            )
 
-        adapter.setViewBinder { view, data, _ ->
-            if (view.id == R.id.tvRoleBadge) {
-                val role = data.toString().lowercase()
-                val tv = view as TextView
-                tv.text = role.uppercase()
-                if (role == "admin") {
-                    tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
-                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
-                } else {
-                    tv.setTextColor(android.graphics.Color.parseColor("#64748B"))
-                    tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#F1F5F9"))
+            adapter.viewBinder = SimpleAdapter.ViewBinder { view, data, _ ->
+                when (view.id) {
+                    R.id.tvLevelBadge -> {
+                        val tv = view as TextView
+                        val roleVal = data.toString().lowercase()
+                        tv.text = roleVal.uppercase()
+
+                        if (roleVal == "admin") {
+                            tv.setTextColor(Color.parseColor("#2563EB"))
+                            tv.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#EFF6FF"))
+                        } else {
+                            tv.setTextColor(Color.parseColor("#16A34A"))
+                            tv.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#DCFCE7"))
+                        }
+                        true
+                    }
+                    R.id.btnMenuUser -> {
+                        val btn = view as ImageButton
+                        val idTerpilih = data.toString()
+
+                        btn.setOnClickListener { v ->
+                            val popup = PopupMenu(this, v)
+                            popup.menu.add("Edit")
+                            popup.menu.add("Hapus")
+
+                            popup.setOnMenuItemClickListener { menuItem ->
+                                val userData = listData.find { it["id_user"] == idTerpilih }
+                                when (menuItem.title) {
+                                    "Edit" -> if (userData != null) showDialogEdit(userData)
+                                    "Hapus" -> if (userData != null) confirmHapus(userData)
+                                }
+                                true
+                            }
+                            popup.show() // Penting: Agar menu muncul
+                        }
+                        true
+                    }
+                    else -> false
                 }
-                return@setViewBinder true
             }
-            false
+            b.listView.adapter = adapter
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        b.listView.adapter = adapter
     }
+
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_user, null)
         val edtNama = view.findViewById<EditText>(R.id.edtNamaUser)
         val edtEmail = view.findViewById<EditText>(R.id.edtEmailUser)
-        val edtNoHp = view.findViewById<EditText>(R.id.edtNoHpUser)
-        val edtPassword = view.findViewById<EditText>(R.id.edtPasswordUser)
+        val edtHp = view.findViewById<EditText>(R.id.edtNoHpUser)
+        val edtPass = view.findViewById<EditText>(R.id.edtPasswordUser)
         val spRole = view.findViewById<Spinner>(R.id.spRoleUser)
 
-        val roleList = arrayOf("admin", "customer")
-        val adapterRole = ArrayAdapter(this, android.R.layout.simple_spinner_item, roleList)
-        adapterRole.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spRole.adapter = adapterRole
+        val roles = arrayOf("admin", "customer")
+        spRole.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, roles)
 
         AlertDialog.Builder(this)
-            .setTitle("Tambah Pengguna")
+            .setTitle("Tambah User Baru")
             .setView(view)
             .setPositiveButton("Simpan") { _, _ ->
-                val nama = edtNama.text.toString().trim()
-                val email = edtEmail.text.toString().trim()
-                val noHp = edtNoHp.text.toString().trim()
-                val password = edtPassword.text.toString().trim()
+                val nama = edtNama.text.toString()
+                val email = edtEmail.text.toString()
+                val hp = edtHp.text.toString()
+                val pass = edtPass.text.toString()
                 val role = spRole.selectedItem.toString()
 
-                if (nama.isEmpty()) {
-                    Toast.makeText(this, "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (email.isEmpty()) {
-                    Toast.makeText(this, "Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (noHp.isEmpty()) {
-                    Toast.makeText(this, "No HP tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (password.isEmpty()) {
-                    Toast.makeText(this, "Password tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (db.checkEmail(email)) {
-                    Toast.makeText(this, "Email sudah terdaftar", Toast.LENGTH_SHORT).show()
-                } else {
-                    val hasil = db.insertPengguna(nama, email, noHp, password, role)
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil ditambah", Toast.LENGTH_SHORT).show()
+                if (nama.isNotEmpty() && email.isNotEmpty()) {
+                    if (db.insertUser(nama, email, hp, pass, role)) {
+                        Toast.makeText(this, "User berhasil ditambah", Toast.LENGTH_SHORT).show()
                         tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal ditambah", Toast.LENGTH_SHORT).show()
                     }
+                } else {
+                    Toast.makeText(this, "Nama & Email wajib diisi!", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton("Batal", null).show()
     }
 
-    private fun showDialogEdit(
-        idUser: Int,
-        namaLama: String,
-        emailLama: String,
-        noHpLama: String,
-        passwordLama: String,
-        roleLama: String
-    ) {
+    private fun showDialogEdit(item: HashMap<String, String>) {
         val view = layoutInflater.inflate(R.layout.dialog_user, null)
         val edtNama = view.findViewById<EditText>(R.id.edtNamaUser)
         val edtEmail = view.findViewById<EditText>(R.id.edtEmailUser)
-        val edtNoHp = view.findViewById<EditText>(R.id.edtNoHpUser)
-        val edtPassword = view.findViewById<EditText>(R.id.edtPasswordUser)
+        val edtHp = view.findViewById<EditText>(R.id.edtNoHpUser)
+        val edtPass = view.findViewById<EditText>(R.id.edtPasswordUser)
         val spRole = view.findViewById<Spinner>(R.id.spRoleUser)
 
-        edtNama.setText(namaLama)
-        edtEmail.setText(emailLama)
-        edtNoHp.setText(noHpLama)
-        edtPassword.setText(passwordLama)
+        edtNama.setText(item["nama"])
+        edtEmail.setText(item["email"])
+        edtHp.setText(item["no_hp"])
+        edtPass.setText(item["password"])
 
-        val roleList = arrayOf("admin", "customer")
-        val adapterRole = ArrayAdapter(this, android.R.layout.simple_spinner_item, roleList)
-        adapterRole.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spRole.adapter = adapterRole
-
-        val posisiRole = roleList.indexOf(roleLama)
-        if (posisiRole >= 0) {
-            spRole.setSelection(posisiRole)
-        }
+        val roles = arrayOf("admin", "customer")
+        spRole.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, roles)
+        if (item["role"]?.lowercase() == "admin") spRole.setSelection(0) else spRole.setSelection(1)
 
         AlertDialog.Builder(this)
-            .setTitle("Edit Pengguna")
+            .setTitle("Edit Data User")
             .setView(view)
             .setPositiveButton("Update") { _, _ ->
-                val nama = edtNama.text.toString().trim()
-                val email = edtEmail.text.toString().trim()
-                val noHp = edtNoHp.text.toString().trim()
-                val password = edtPassword.text.toString().trim()
-                val role = spRole.selectedItem.toString()
-
-                if (nama.isEmpty()) {
-                    Toast.makeText(this, "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (email.isEmpty()) {
-                    Toast.makeText(this, "Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (noHp.isEmpty()) {
-                    Toast.makeText(this, "No HP tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (password.isEmpty()) {
-                    Toast.makeText(this, "Password tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                } else if (db.checkEmailUserLain(email, idUser)) {
-                    Toast.makeText(this, "Email sudah dipakai user lain", Toast.LENGTH_SHORT).show()
-                } else {
-                    val hasil = db.updatePengguna(idUser, nama, email, noHp, password, role)
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil diupdate", Toast.LENGTH_SHORT).show()
-                        tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal diupdate", Toast.LENGTH_SHORT).show()
-                    }
+                val idUser = item["id_user"]!!.toInt()
+                val berhasil = db.updatePengguna(
+                    idUser,
+                    edtNama.text.toString(),
+                    edtEmail.text.toString(),
+                    edtHp.text.toString(),
+                    edtPass.text.toString(),
+                    spRole.selectedItem.toString()
+                )
+                if (berhasil) {
+                    Toast.makeText(this, "Data berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                    tampilData()
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton("Batal", null).show()
+    }
+
+    private fun confirmHapus(userData: HashMap<String, String>) {
+        val idUser = userData["id_user"]?.toInt() ?: return
+        AlertDialog.Builder(this)
+            .setTitle("Hapus User")
+            .setMessage("Yakin ingin menghapus ${userData["nama"]}?")
+            .setPositiveButton("Hapus") { _, _ ->
+                if (db.deleteUser(idUser)) {
+                    Toast.makeText(this, "User dihapus", Toast.LENGTH_SHORT).show()
+                    tampilData()
+                }
+            }
+            .setNegativeButton("Batal", null).show()
     }
 }

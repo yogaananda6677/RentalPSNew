@@ -11,58 +11,52 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.Light.NoActionBar">
-
+        <activity
+            android:name=".PembayaranFragment"
+            android:exported="false" />
+        <!-- <activity -->
+        <!-- android:name=".PembayaranActivity" -->
+        <!-- android:exported="false" /> -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-
         <activity
             android:name=".TransaksiActivity"
             android:exported="false" />
-
         <activity
             android:name=".UserActivity"
             android:exported="false" />
-
         <activity
             android:name=".ProdukActivity"
             android:exported="false" />
-
         <activity
             android:name=".PlaystationActivity"
             android:exported="false" />
-
         <activity
             android:name=".TipePsActivity"
-            android:exported="false" />
-
-<!--        <activity-->
-<!--            android:name=".DashboardActivity"-->
-<!--            android:exported="false" />-->
-
+            android:exported="false" /> <!-- <activity -->
+        <!-- android:name=".DashboardActivity" -->
+        <!-- android:exported="false" /> -->
         <activity
             android:name=".OnBoardingActivity"
             android:exported="false" />
-
         <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>

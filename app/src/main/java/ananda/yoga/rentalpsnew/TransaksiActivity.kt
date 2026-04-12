@@ -3,6 +3,7 @@ package ananda.yoga.rentalpsnew
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -11,9 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityTransaksiBinding
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class TransaksiActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -35,22 +34,17 @@ class TransaksiActivity : AppCompatActivity(), View.OnClickListener {
 
     private var jamMulai: String = ""
     private var jamSelesai: String = ""
-
-    private var selectedProdukId: Int = 0
-    private var selectedProdukHarga: Double = 0.0
-    private var selectedProdukStock: Int = 0
-
     private var subtotalSewa = 0.0
     private var subtotalProduk = 0.0
     private var totalSemua = 0.0
 
+    private var listPsTersedia = ArrayList<HashMap<String, String>>()
     private var listProduk = ArrayList<HashMap<String, String>>()
     private val listProdukDipilih = ArrayList<ProdukDipilih>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         b = ActivityTransaksiBinding.inflate(layoutInflater)
         setContentView(b.root)
 
@@ -62,8 +56,7 @@ class TransaksiActivity : AppCompatActivity(), View.OnClickListener {
             insets
         }
 
-        ambilIntent()
-        setupAwal()
+        setupSpinnerPs()
         setupSpinnerProduk()
 
         b.ivBack.setOnClickListener(this)
@@ -73,278 +66,142 @@ class TransaksiActivity : AppCompatActivity(), View.OnClickListener {
         b.btnSimpanTransaksi.setOnClickListener(this)
     }
 
-    private fun ambilIntent() {
-        idPs = intent.getIntExtra("id_ps", 0)
-        nomorPs = intent.getStringExtra("nomor_ps").toString()
-        namaTipe = intent.getStringExtra("nama_tipe").toString()
-        hargaPerJam = db.getHargaSewaByNamaTipe(namaTipe)
-    }
+    private fun setupSpinnerPs() {
+        // Ambil data PS yang statusnya 'tersedia'
+        val rawData = db.getAllPlaystation()
+        listPsTersedia = rawData.filter { it["status_ps"] == "tersedia" } as ArrayList<HashMap<String, String>>
 
-    private fun setupAwal() {
-        b.tvNomorPs.text = nomorPs
-        b.tvTipePs.text = namaTipe
-        b.tvHargaPerJam.text = "Rp ${hargaPerJam.toInt()}/jam"
+        val namaPsList = listPsTersedia.map { "${it["nomor_ps"]} (${it["nama_tipe"]})" }
 
-        b.tvJamSelesai.text = "-"
-        b.tvSubtotalSewa.text = "Rp 0"
-        b.tvSubtotalProduk.text = "Rp 0"
-        b.tvTotalSemua.text = "Rp 0"
-        b.tvDetailProduk.text = "Belum ada produk ditambahkan"
+        // Gunakan layout custom agar Spinner rapi (tidak mepet)
+        val adapter = ArrayAdapter(this, R.layout.item_spinner_custom, namaPsList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        b.spPilihPs.adapter = adapter
+
+        b.spPilihPs.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                if (listPsTersedia.isNotEmpty()) {
+                    val item = listPsTersedia[pos]
+                    idPs = item["id_ps"]!!.toInt()
+                    nomorPs = item["nomor_ps"]!!
+                    namaTipe = item["nama_tipe"]!!
+                    hargaPerJam = db.getHargaSewaByNamaTipe(namaTipe)
+
+                    b.tvNomorPs.text = nomorPs
+                    b.tvTipePs.text = "Tipe: $namaTipe"
+                    b.tvHargaPerJam.text = "Harga: Rp ${hargaPerJam.toInt()}/jam"
+                }
+            }
+            override fun onNothingSelected(p: AdapterView<*>?) {}
+        }
     }
 
     private fun setupSpinnerProduk() {
         listProduk = db.getAllProdukSpinner()
+        val namaProd = listProduk.map { "${it["nama"]} (Rp ${it["harga"]?.toDouble()?.toInt()})" }
 
-        val namaProduk = ArrayList<String>()
-        for (item in listProduk) {
-            namaProduk.add("${item["nama"]} - stok ${item["stock"]}")
-        }
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, namaProduk)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        b.spProduk.adapter = adapter
-
-        b.spProduk.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: android.widget.AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val item = listProduk[position]
-                selectedProdukId = item["id_produk"]!!.toInt()
-                selectedProdukHarga = item["harga"]!!.toDouble()
-                selectedProdukStock = item["stock"]!!.toInt()
-
-                b.tvHargaProduk.text = "Rp ${selectedProdukHarga.toInt()}"
-            }
-
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {
-            }
-        }
+        // Gunakan layout custom di sini juga
+        val adapterProd = ArrayAdapter(this, R.layout.item_spinner_custom, namaProd)
+        adapterProd.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        b.spProduk.adapter = adapterProd
     }
 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.ivBack -> finish()
-            R.id.edtJamMulai -> showTimePicker()
-            R.id.btnHitungSewa -> hitungSewa()
-            R.id.btnTambahProduk -> tambahProdukKeList()
-            R.id.btnSimpanTransaksi -> simpanTransaksi()
+            R.id.edtJamMulai -> {
+                val c = Calendar.getInstance()
+                TimePickerDialog(this, { _, h, m ->
+                    jamMulai = String.format("%02d:%02d", h, m)
+                    b.edtJamMulai.setText(jamMulai)
+                }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show()
+            }
+            R.id.btnHitungSewa -> {
+                val durasiStr = b.edtDurasi.text.toString()
+                val durasi = durasiStr.toIntOrNull() ?: 0
+
+                if (jamMulai.isEmpty() || durasi <= 0) {
+                    Toast.makeText(this, "Isi Jam Mulai & Durasi dengan benar!", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                subtotalSewa = durasi * hargaPerJam
+                val parts = jamMulai.split(":")
+                val jam = (parts[0].toInt() + durasi) % 24
+                jamSelesai = String.format("%02d:%02d", jam, parts[1].toInt())
+
+                b.tvJamSelesai.text = "Selesai: $jamSelesai"
+                b.tvSubtotalSewa.text = "Subtotal PS: Rp ${subtotalSewa.toInt()}"
+                updateTotal()
+            }
+            R.id.btnTambahProduk -> {
+                val qty = b.edtQtyProduk.text.toString().toIntOrNull() ?: 0
+                val pos = b.spProduk.selectedItemPosition
+
+                if (pos == -1 || listProduk.isEmpty() || qty <= 0) {
+                    Toast.makeText(this, "Pilih produk dan isi jumlah!", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val item = listProduk[pos]
+                val harga = item["harga"]?.toDouble() ?: 0.0
+                val sub = qty * harga
+
+                listProdukDipilih.add(ProdukDipilih(
+                    item["id_produk"]!!.toInt(),
+                    item["nama"]!!,
+                    harga,
+                    qty,
+                    sub
+                ))
+
+                subtotalProduk = listProdukDipilih.sumOf { it.subtotal }
+                b.tvSubtotalProduk.text = "Subtotal Produk: Rp ${subtotalProduk.toInt()}"
+                b.tvDetailProduk.text = listProdukDipilih.joinToString("\n") { "${it.namaProduk} x${it.qty}" }
+                updateTotal()
+                b.edtQtyProduk.setText("")
+            }
+            R.id.btnSimpanTransaksi -> simpan()
         }
     }
 
-    private fun showTimePicker() {
-        val calendar = Calendar.getInstance()
-        val jam = calendar.get(Calendar.HOUR_OF_DAY)
-        val menit = calendar.get(Calendar.MINUTE)
-
-        val dialog = TimePickerDialog(this, { _, hourOfDay, minute ->
-            jamMulai = String.format("%02d:%02d", hourOfDay, minute)
-            b.edtJamMulai.setText(jamMulai)
-        }, jam, menit, true)
-
-        dialog.show()
-    }
-
-    private fun hitungSewa() {
-        val durasiText = b.edtDurasi.text.toString().trim()
-
-        if (jamMulai.isEmpty()) {
-            b.edtJamMulai.error = "Pilih jam mulai"
-            b.edtJamMulai.requestFocus()
-            return
-        }
-
-        if (durasiText.isEmpty()) {
-            b.edtDurasi.error = "Durasi wajib diisi"
-            b.edtDurasi.requestFocus()
-            return
-        }
-
-        val durasi = durasiText.toInt()
-
-        if (durasi <= 0) {
-            b.edtDurasi.error = "Durasi harus lebih dari 0"
-            b.edtDurasi.requestFocus()
-            return
-        }
-
-        subtotalSewa = durasi * hargaPerJam
-        jamSelesai = hitungJamSelesai(jamMulai, durasi)
-
-        b.tvJamSelesai.text = jamSelesai
-        b.tvSubtotalSewa.text = "Rp ${subtotalSewa.toInt()}"
-
-        hitungTotalAkhir()
-    }
-
-    private fun tambahProdukKeList() {
-        if (listProduk.isEmpty()) {
-            Toast.makeText(this, "Produk tidak tersedia", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val qtyText = b.edtQtyProduk.text.toString().trim()
-
-        if (qtyText.isEmpty()) {
-            b.edtQtyProduk.error = "Qty wajib diisi"
-            b.edtQtyProduk.requestFocus()
-            return
-        }
-
-        val qty = qtyText.toInt()
-
-        if (qty <= 0) {
-            b.edtQtyProduk.error = "Qty harus lebih dari 0"
-            b.edtQtyProduk.requestFocus()
-            return
-        }
-
-        val indexProdukSama = listProdukDipilih.indexOfFirst { it.idProduk == selectedProdukId }
-        val qtySudahAda = if (indexProdukSama >= 0) listProdukDipilih[indexProdukSama].qty else 0
-        val totalQtyBaru = qtySudahAda + qty
-
-        if (totalQtyBaru > selectedProdukStock) {
-            Toast.makeText(this, "Qty melebihi stok yang tersedia", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val namaProduk = listProduk[b.spProduk.selectedItemPosition]["nama"].toString()
-        val subtotal = qty * selectedProdukHarga
-
-        if (indexProdukSama >= 0) {
-            val produkLama = listProdukDipilih[indexProdukSama]
-            val qtyBaru = produkLama.qty + qty
-            val subtotalBaru = qtyBaru * produkLama.harga
-
-            listProdukDipilih[indexProdukSama] = ProdukDipilih(
-                idProduk = produkLama.idProduk,
-                namaProduk = produkLama.namaProduk,
-                harga = produkLama.harga,
-                qty = qtyBaru,
-                subtotal = subtotalBaru
-            )
-        } else {
-            listProdukDipilih.add(
-                ProdukDipilih(
-                    idProduk = selectedProdukId,
-                    namaProduk = namaProduk,
-                    harga = selectedProdukHarga,
-                    qty = qty,
-                    subtotal = subtotal
-                )
-            )
-        }
-
-        b.edtQtyProduk.setText("")
-        hitungSubtotalProduk()
-        tampilProdukDipilih()
-
-        Toast.makeText(this, "Produk ditambahkan", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun tampilProdukDipilih() {
-        if (listProdukDipilih.isEmpty()) {
-            b.tvDetailProduk.text = "Belum ada produk ditambahkan"
-            return
-        }
-
-        val sb = StringBuilder()
-        for ((index, item) in listProdukDipilih.withIndex()) {
-            sb.append(index + 1)
-                .append(". ")
-                .append(item.namaProduk)
-                .append(" x")
-                .append(item.qty)
-                .append(" = Rp ")
-                .append(item.subtotal.toInt())
-                .append("\n")
-        }
-
-        b.tvDetailProduk.text = sb.toString()
-    }
-
-    private fun hitungSubtotalProduk() {
-        subtotalProduk = listProdukDipilih.sumOf { it.subtotal }
-        b.tvSubtotalProduk.text = "Rp ${subtotalProduk.toInt()}"
-        hitungTotalAkhir()
-    }
-
-    private fun hitungTotalAkhir() {
+    private fun updateTotal() {
         totalSemua = subtotalSewa + subtotalProduk
-        b.tvTotalSemua.text = "Rp ${totalSemua.toInt()}"
+        b.tvTotalSemua.text = "TOTAL: Rp ${totalSemua.toInt()}"
     }
 
-    private fun hitungJamSelesai(jamMulai: String, durasi: Int): String {
-        val parts = jamMulai.split(":")
-        var jam = parts[0].toInt()
-        val menit = parts[1].toInt()
-
-        jam += durasi
-        if (jam >= 24) jam -= 24
-
-        return String.format("%02d:%02d", jam, menit)
-    }
-
-    private fun simpanTransaksi() {
-        val durasiText = b.edtDurasi.text.toString().trim()
-
-        if (jamMulai.isEmpty() || durasiText.isEmpty()) {
-            Toast.makeText(this, "Hitung sewa PS dulu", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+    private fun simpan() {
         if (subtotalSewa <= 0) {
-            Toast.makeText(this, "Subtotal sewa belum dihitung", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Silakan hitung sewa terlebih dahulu!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val tanggal = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val tgl = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // sementara admin id = 1
-        val idUserDummyAdmin = 1
+        // Asumsi ID User 1 (Admin) sudah ada di database
+        val idTrans = db.insertTransaksi(1, tgl, totalSemua, "aktif")
 
-        val idTransaksi = db.insertTransaksi(
-            idUserDummyAdmin,
-            tanggal,
-            totalSemua,
-            "aktif"
-        )
-
-        if (idTransaksi == -1L) {
-            Toast.makeText(this, "Gagal simpan transaksi", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val detailSewaBerhasil = db.insertDetailSewaPs(
-            idTransaksi,
-            idPs,
-            durasiText.toInt(),
-            jamMulai,
-            jamSelesai,
-            namaTipe,
-            hargaPerJam,
-            subtotalSewa
-        )
-
-        if (!detailSewaBerhasil) {
-            Toast.makeText(this, "Gagal simpan detail sewa", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        for (item in listProdukDipilih) {
-            db.insertDetailProduk(
-                idTransaksi,
-                item.idProduk,
-                item.qty,
-                item.subtotal
+        if (idTrans != -1L) {
+            // Simpan detail sewa
+            db.insertDetailSewaPs(
+                idTrans, idPs, b.edtDurasi.text.toString().toInt(),
+                jamMulai, jamSelesai, namaTipe, hargaPerJam, subtotalSewa
             )
+
+            // Simpan detail jajan jika ada
+            if (listProdukDipilih.isNotEmpty()) {
+                for (p in listProdukDipilih) {
+                    db.insertDetailProduk(idTrans, p.idProduk, p.qty, p.subtotal)
+                }
+            }
+
+            // Update status PS menjadi 'dipakai' agar tidak muncul di transaksi baru
+            db.updateStatusPs(idPs, "dipakai")
+
+            Toast.makeText(this, "Transaksi Berhasil Disimpan!", Toast.LENGTH_SHORT).show()
+            finish()
+        } else {
+            Toast.makeText(this, "Gagal menyimpan transaksi!", Toast.LENGTH_SHORT).show()
         }
-
-        db.updateStatusPs(idPs, "dipakai")
-
-        Toast.makeText(this, "Transaksi berhasil disimpan", Toast.LENGTH_SHORT).show()
-        finish()
     }
 }

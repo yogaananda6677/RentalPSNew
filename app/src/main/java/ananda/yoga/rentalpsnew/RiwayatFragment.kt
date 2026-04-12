@@ -27,20 +27,28 @@ class RiwayatFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         db = DBOpenHelper(requireContext())
-
         b.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
-        tampilData()
-    }
 
-    override fun onResume() {
-        super.onResume()
         tampilData()
     }
 
     private fun tampilData() {
         listData = db.getAllRiwayatTransaksi()
-        b.rvRiwayat.adapter = RiwayatAdapter(listData)
-        b.tvKosong.visibility = if (listData.isEmpty()) View.VISIBLE else View.GONE
+        val totalDuit = db.getTotalPendapatanHariIni()
+
+        if (listData.isEmpty()) {
+            b.tvKosong.visibility = View.VISIBLE
+            b.rvRiwayat.visibility = View.GONE
+        } else {
+            b.tvKosong.visibility = View.GONE
+            b.rvRiwayat.visibility = View.VISIBLE
+            b.rvRiwayat.adapter = RiwayatAdapter(listData)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        tampilData()
     }
 
     override fun onDestroyView() {

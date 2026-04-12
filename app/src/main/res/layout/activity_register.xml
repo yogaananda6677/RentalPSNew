@@ -26,6 +26,8 @@
         android:elevation="2dp"
         android:padding="12dp"
         android:src="@drawable/ic_arrow_back_24"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,8 +47,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
         android:fillViewport="true"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
@@ -55,12 +57,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingBottom="32dp">
+            android:paddingBottom="40dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:text="Nama Lengkap"
                 android:textColor="#334155"
                 android:textSize="12sp"
@@ -193,7 +195,8 @@
                     android:layout_height="wrap_content"
                     android:text="Login"
                     android:textColor="#2563EB"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:padding="4dp" />
             </LinearLayout>
 
         </LinearLayout>

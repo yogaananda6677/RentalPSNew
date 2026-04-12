@@ -4,21 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:layout_marginBottom="1dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvIcon"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        app:cardCornerRadius="21dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
-        app:cardBackgroundColor="#EFF6FF"
+        app:cardBackgroundColor="#F1F5F9"
         android:layout_centerVertical="true">
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_person"
+            android:src="@drawable/ic_laporan"
             app:tint="#2563EB" />
     </androidx.cardview.widget.CardView>
 
@@ -34,49 +35,29 @@
             android:id="@+id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nama User"
+            android:text="Nomor PS"
             android:textColor="#0F172A"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="email@petugas.com"
+            android:text="Detail Waktu"
             android:textColor="#64748B"
-            android:textSize="13sp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tvLevelBadge"
+        android:id="@+id/tvHargaLaporan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/btnMenuUser"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="8dp"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp"
-        android:text="ADMIN"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:background="@drawable/bg_badge_green" />
-
-    <ImageButton
-        android:id="@+id/btnMenuUser"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_more_vert"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="#64748B"
-        android:contentDescription="Menu" />
+        android:text="Rp 0"
+        android:textColor="#16A34A"
+        android:textStyle="bold"
+        android:textSize="14sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#F1F5F9"
-        android:layout_below="@id/cvIcon"
-        android:layout_marginTop="16dp" />
 </RelativeLayout>

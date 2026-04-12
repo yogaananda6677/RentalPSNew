@@ -2,21 +2,12 @@ package ananda.yoga.rentalpsnew
 
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.SimpleAdapter
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import ananda.yoga.rentalpsnew.databinding.ActivityPlaystationBinding
 
-class PlaystationActivity : AppCompatActivity(), View.OnClickListener {
+class PlaystationActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityPlaystationBinding
     private lateinit var db: DBOpenHelper
@@ -24,214 +15,143 @@ class PlaystationActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         b = ActivityPlaystationBinding.inflate(layoutInflater)
         setContentView(b.root)
 
         db = DBOpenHelper(this)
-
-        ViewCompat.setOnApplyWindowInsetsListener(b.main) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
-        }
-
-        b.ivBack.setOnClickListener(this)
-        b.btnTambah.setOnClickListener(this)
-
         tampilData()
 
-        b.listView.setOnItemClickListener { _, _, position, _ ->
-            val item = listData[position]
-            showDialogEdit(
-                item["id_ps"]!!.toInt(),
-                item["nomor_ps"].toString(),
-                item["id_tipe"]!!.toInt(),
-                item["status_ps"].toString()
-            )
-        }
-
-        b.listView.onItemLongClickListener =
-            AdapterView.OnItemLongClickListener { _, _, position, _ ->
-                val item = listData[position]
-                val id = item["id_ps"]!!.toInt()
-
-                AlertDialog.Builder(this)
-                    .setTitle("Hapus Data")
-                    .setMessage("Yakin ingin menghapus data PS ini?")
-                    .setPositiveButton("Ya") { _, _ ->
-                        val hasil = db.deletePlaystation(id)
-                        if (hasil) {
-                            Toast.makeText(this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show()
-                            tampilData()
-                        } else {
-                            Toast.makeText(this, "Data gagal dihapus", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .setNegativeButton("Batal", null)
-                    .show()
-
-                true
-            }
+        b.ivBack.setOnClickListener { finish() }
+        b.btnTambah.setOnClickListener { showDialogTambah() }
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.ivBack -> finish()
-            R.id.btnTambah -> showDialogTambah()
-        }
-    }
-
-    // --- FUNGSI TAMPIL DATA (DENGAN GARIS & WARNA BADGE) ---
-    private fun tampilData() {
+    fun tampilData() {
         listData = db.getAllPlaystation()
 
-        // Pastikan "status_ps" ada di daftar keys agar setViewBinder bisa membacanya
         val adapter = SimpleAdapter(
-            this,
-            listData,
-            R.layout.item_playstation, // Menggunakan layout kustom dengan garis pembatas
-            arrayOf("nomor_ps", "nama_tipe", "status_ps"),
-            intArrayOf(R.id.text1, R.id.text2, R.id.tvStatusBadge)
+            this, listData, R.layout.item_playstation,
+            arrayOf("nomor_ps", "nama_tipe", "status_ps", "id_ps"), // Tambah id_ps untuk menu
+            intArrayOf(R.id.text1, R.id.text2, R.id.tvStatusBadge, R.id.btnMenuPs)
         )
 
-        // Logika pewarnaan Badge secara dinamis
-        adapter.setViewBinder { view, data, _ ->
-            if (view.id == R.id.tvStatusBadge) {
-                val status = data.toString().lowercase()
-                val tv = view as TextView
-                tv.text = status.uppercase()
+        adapter.viewBinder = SimpleAdapter.ViewBinder { view, data, _ ->
+            when (view.id) {
+                R.id.tvStatusBadge -> {
+                    val status = data.toString()
+                    val tv = view as TextView
+                    tv.text = status.uppercase()
 
-                when (status) {
-                    "tersedia" -> {
-                        tv.setTextColor(android.graphics.Color.parseColor("#16A34A"))
-                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DCFCE7"))
+                    // Logic warna badge minimalis
+                    when (status.lowercase()) {
+                        "maintenance" -> {
+                            tv.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FEE2E2"))
+                        }
+                        "dipakai" -> {
+                            tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
+                        }
+                        "tersedia" -> {
+                            tv.setTextColor(android.graphics.Color.parseColor("#16A34A"))
+                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DCFCE7"))
+                        }
                     }
-                    "dipakai" -> {
-                        tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
-                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
-                    }
-                    "maintenance" -> {
-                        tv.setTextColor(android.graphics.Color.parseColor("#EA580C"))
-                        tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF7ED"))
-                    }
+                    true
                 }
-                return@setViewBinder true
-            }
-            false
-        }
+                R.id.btnMenuPs -> {
+                    val btn = view as ImageButton
+                    val idPs = data.toString()
 
+                    btn.setOnClickListener { v ->
+                        val popup = PopupMenu(this, v)
+                        popup.menu.add("Edit")
+                        popup.menu.add("Hapus")
+
+                        popup.setOnMenuItemClickListener { menuItem ->
+                            val item = listData.find { it["id_ps"] == idPs }
+                            when (menuItem.title) {
+                                "Edit" -> if (item != null) showDialogEdit(item)
+                                "Hapus" -> if (item != null) confirmHapusPs(item)
+                            }
+                            true
+                        }
+                        popup.show()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
         b.listView.adapter = adapter
     }
 
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_playstation, null)
-        val edtNomorPs = view.findViewById<EditText>(R.id.edtNomorPs)
+        val edtNomor = view.findViewById<EditText>(R.id.edtNomorPs)
         val spTipe = view.findViewById<Spinner>(R.id.spTipePs)
         val spStatus = view.findViewById<Spinner>(R.id.spStatusPs)
 
         val listTipe = db.getAllTipePsForSpinner()
-        val namaTipeList = ArrayList<String>()
-
-        for (item in listTipe) {
-            namaTipeList.add(item["nama_tipe"].toString())
-        }
-
-        val adapterTipe = ArrayAdapter(this, android.R.layout.simple_spinner_item, namaTipeList)
+        val adapterTipe = ArrayAdapter(this, R.layout.item_spinner_custom, listTipe.map { it["nama_tipe"] })
         adapterTipe.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spTipe.adapter = adapterTipe
 
-        val statusList = arrayOf("tersedia", "dipakai", "maintenance")
-        val adapterStatus = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusList)
-        adapterStatus.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spStatus.adapter = adapterStatus
+        spStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("tersedia", "dipakai", "maintenance"))
 
-        AlertDialog.Builder(this)
-            .setTitle("Tambah Playstation")
-            .setView(view)
+        AlertDialog.Builder(this).setTitle("Tambah Unit PS").setView(view)
             .setPositiveButton("Simpan") { _, _ ->
-                val nomorPs = edtNomorPs.text.toString().trim()
-                val posisiTipe = spTipe.selectedItemPosition
-                val idTipe = if (listTipe.isNotEmpty()) listTipe[posisiTipe]["id_tipe"]!!.toInt() else 0
-                val statusPs = spStatus.selectedItem.toString()
-
-                if (nomorPs.isNotEmpty()) {
-                    val hasil = db.insertPlaystation(nomorPs, idTipe, statusPs)
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil ditambah", Toast.LENGTH_SHORT).show()
-                        tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal ditambah", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "Nomor PS tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                val nomor = edtNomor.text.toString()
+                if (nomor.isNotEmpty() && listTipe.isNotEmpty()) {
+                    val idTipe = listTipe[spTipe.selectedItemPosition]["id_tipe"]!!.toInt()
+                    val status = spStatus.selectedItem.toString()
+                    if (db.insertPlaystation(nomor, idTipe, status)) tampilData()
                 }
-            }
-            .setNegativeButton("Batal", null)
-            .show()
+            }.setNegativeButton("Batal", null).show()
     }
 
-    private fun showDialogEdit(idPs: Int, nomorPsLama: String, idTipeLama: Int, statusPsLama: String) {
+    private fun showDialogEdit(item: HashMap<String, String>) {
         val view = layoutInflater.inflate(R.layout.dialog_playstation, null)
-        val edtNomorPs = view.findViewById<EditText>(R.id.edtNomorPs)
+        val edtNomor = view.findViewById<EditText>(R.id.edtNomorPs)
         val spTipe = view.findViewById<Spinner>(R.id.spTipePs)
         val spStatus = view.findViewById<Spinner>(R.id.spStatusPs)
 
-        edtNomorPs.setText(nomorPsLama)
-
         val listTipe = db.getAllTipePsForSpinner()
-        val namaTipeList = ArrayList<String>()
-
-        for (item in listTipe) {
-            namaTipeList.add(item["nama_tipe"].toString())
-        }
-
-        val adapterTipe = ArrayAdapter(this, android.R.layout.simple_spinner_item, namaTipeList)
+        val adapterTipe = ArrayAdapter(this, R.layout.item_spinner_custom, listTipe.map { it["nama_tipe"] })
         adapterTipe.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spTipe.adapter = adapterTipe
 
-        var posisiTipeTerpilih = 0
-        for (i in listTipe.indices) {
-            if (listTipe[i]["id_tipe"]!!.toInt() == idTipeLama) {
-                posisiTipeTerpilih = i
-                break
-            }
-        }
-        spTipe.setSelection(posisiTipeTerpilih)
+        edtNomor.setText(item["nomor_ps"])
 
-        val statusList = arrayOf("tersedia", "dipakai", "maintenance")
-        val adapterStatus = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusList)
-        adapterStatus.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spStatus.adapter = adapterStatus
+        val posTipe = listTipe.indexOfFirst { it["id_tipe"] == item["id_tipe"] }
+        if (posTipe >= 0) spTipe.setSelection(posTipe)
 
-        val posisiStatus = statusList.indexOf(statusPsLama)
-        if (posisiStatus >= 0) {
-            spStatus.setSelection(posisiStatus)
-        }
+        val statusArray = arrayOf("tersedia", "dipakai", "maintenance")
+        spStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, statusArray)
+        spStatus.setSelection(statusArray.indexOf(item["status_ps"]))
 
         AlertDialog.Builder(this)
-            .setTitle("Edit Playstation")
+            .setTitle("Edit Unit PS")
             .setView(view)
             .setPositiveButton("Update") { _, _ ->
-                val nomorPs = edtNomorPs.text.toString().trim()
-                val posisiTipe = spTipe.selectedItemPosition
-                val idTipe = if (listTipe.isNotEmpty()) listTipe[posisiTipe]["id_tipe"]!!.toInt() else 0
-                val statusPs = spStatus.selectedItem.toString()
-
-                if (nomorPs.isNotEmpty()) {
-                    val hasil = db.updatePlaystation(idPs, nomorPs, idTipe, statusPs)
-                    if (hasil) {
-                        Toast.makeText(this, "Data berhasil diupdate", Toast.LENGTH_SHORT).show()
-                        tampilData()
-                    } else {
-                        Toast.makeText(this, "Data gagal diupdate", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "Nomor PS tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                val idTipe = listTipe[spTipe.selectedItemPosition]["id_tipe"]!!.toInt()
+                if (db.updatePlaystation(item["id_ps"]!!.toInt(), edtNomor.text.toString(), idTipe, spStatus.selectedItem.toString())) {
+                    tampilData()
+                    Toast.makeText(this, "Berhasil diperbarui", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton("Batal", null).show()
+    }
+
+    private fun confirmHapusPs(item: HashMap<String, String>) {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus Unit")
+            .setMessage("Yakin ingin menghapus ${item["nomor_ps"]}?")
+            .setPositiveButton("Ya, Hapus") { _, _ ->
+                if (db.deletePlaystation(item["id_ps"]!!.toInt())) {
+                    Toast.makeText(this, "Berhasil dihapus", Toast.LENGTH_SHORT).show()
+                    tampilData()
+                }
+            }
+            .setNegativeButton("Batal", null).show()
     }
 }

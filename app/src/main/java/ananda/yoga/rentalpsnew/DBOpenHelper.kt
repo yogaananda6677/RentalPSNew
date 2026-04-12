@@ -10,120 +10,21 @@ class DBOpenHelper(context: Context) :
     SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlUser = """
-            CREATE TABLE user (
-                id_user INTEGER PRIMARY KEY AUTOINCREMENT,
-                nama TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                no_hp TEXT,
-                password TEXT NOT NULL,
-                role TEXT NOT NULL DEFAULT 'customer'
-            )
-        """.trimIndent()
+        db?.execSQL("CREATE TABLE user (id_user INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT NOT NULL, email TEXT NOT NULL UNIQUE, no_hp TEXT, password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'customer')")
+        db?.execSQL("CREATE TABLE transaksi (id_transaksi INTEGER PRIMARY KEY AUTOINCREMENT, id_user INTEGER NOT NULL, tanggal TEXT NOT NULL, total_harga REAL NOT NULL, status_transaksi TEXT NOT NULL, FOREIGN KEY(id_user) REFERENCES user(id_user))")
+        db?.execSQL("CREATE TABLE tipe_ps (id_tipe INTEGER PRIMARY KEY AUTOINCREMENT, nama_tipe TEXT NOT NULL, harga_sewa REAL NOT NULL)")
+        db?.execSQL("CREATE TABLE playstation (id_ps INTEGER PRIMARY KEY AUTOINCREMENT, nomor_ps TEXT NOT NULL, id_tipe INTEGER NOT NULL, status_ps TEXT NOT NULL, FOREIGN KEY(id_tipe) REFERENCES tipe_ps(id_tipe))")
+        db?.execSQL("CREATE TABLE produk (id_produk INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT NOT NULL, jenis TEXT NOT NULL, harga REAL NOT NULL, stock INTEGER NOT NULL)")
+        db?.execSQL("CREATE TABLE detail_sewa_ps (id_dt_booking INTEGER PRIMARY KEY AUTOINCREMENT, id_transaksi INTEGER NOT NULL, id_ps INTEGER NOT NULL, durasi INTEGER NOT NULL, jam_mulai TEXT NOT NULL, jam_selesai TEXT NOT NULL, type_ps TEXT NOT NULL, harga_perjam REAL NOT NULL, subtotal REAL NOT NULL, FOREIGN KEY(id_transaksi) REFERENCES transaksi(id_transaksi), FOREIGN KEY(id_ps) REFERENCES playstation(id_ps))")
+        db?.execSQL("CREATE TABLE detail_produk (id_dt_produk INTEGER PRIMARY KEY AUTOINCREMENT, id_transaksi INTEGER NOT NULL, id_produk INTEGER NOT NULL, qty INTEGER NOT NULL, subtotal REAL NOT NULL, FOREIGN KEY(id_transaksi) REFERENCES transaksi(id_transaksi), FOREIGN KEY(id_produk) REFERENCES produk(id_produk))")
 
-        val sqlTransaksi = """
-            CREATE TABLE transaksi (
-                id_transaksi INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_user INTEGER NOT NULL,
-                tanggal TEXT NOT NULL,
-                total_harga REAL NOT NULL,
-                status_transaksi TEXT NOT NULL,
-                FOREIGN KEY(id_user) REFERENCES user(id_user)
-            )
-        """.trimIndent()
-
-        val sqlTipePs = """
-            CREATE TABLE tipe_ps (
-                id_tipe INTEGER PRIMARY KEY AUTOINCREMENT,
-                nama_tipe TEXT NOT NULL,
-                harga_sewa REAL NOT NULL
-            )
-        """.trimIndent()
-
-        val sqlPlaystation = """
-            CREATE TABLE playstation (
-                id_ps INTEGER PRIMARY KEY AUTOINCREMENT,
-                nomor_ps TEXT NOT NULL,
-                id_tipe INTEGER NOT NULL,
-                status_ps TEXT NOT NULL,
-                FOREIGN KEY(id_tipe) REFERENCES tipe_ps(id_tipe)
-            )
-        """.trimIndent()
-
-        val sqlProduk = """
-            CREATE TABLE produk (
-                id_produk INTEGER PRIMARY KEY AUTOINCREMENT,
-                nama TEXT NOT NULL,
-                jenis TEXT NOT NULL,
-                harga REAL NOT NULL,
-                stock INTEGER NOT NULL
-            )
-        """.trimIndent()
-
-        val sqlDetailSewaPs = """
-            CREATE TABLE detail_sewa_ps (
-                id_dt_booking INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_transaksi INTEGER NOT NULL,
-                id_ps INTEGER NOT NULL,
-                durasi INTEGER NOT NULL,
-                jam_mulai TEXT NOT NULL,
-                jam_selesai TEXT NOT NULL,
-                type_ps TEXT NOT NULL,
-                harga_perjam REAL NOT NULL,
-                subtotal REAL NOT NULL,
-                FOREIGN KEY(id_transaksi) REFERENCES transaksi(id_transaksi),
-                FOREIGN KEY(id_ps) REFERENCES playstation(id_ps)
-            )
-        """.trimIndent()
-
-        val sqlDetailProduk = """
-            CREATE TABLE detail_produk (
-                id_dt_produk INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_transaksi INTEGER NOT NULL,
-                id_produk INTEGER NOT NULL,
-                qty INTEGER NOT NULL,
-                subtotal REAL NOT NULL,
-                FOREIGN KEY(id_transaksi) REFERENCES transaksi(id_transaksi),
-                FOREIGN KEY(id_produk) REFERENCES produk(id_produk)
-            )
-        """.trimIndent()
-
-        val sqlPembayaran = """
-            CREATE TABLE pembayaran (
-                id_pembayaran INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_transaksi INTEGER NOT NULL,
-                metode_pembayaran TEXT NOT NULL,
-                total_bayar REAL NOT NULL,
-                waktu_bayar TEXT NOT NULL,
-                status_bayar TEXT NOT NULL,
-                FOREIGN KEY(id_transaksi) REFERENCES transaksi(id_transaksi)
-            )
-        """.trimIndent()
-
-        db?.execSQL(sqlUser)
-        db?.execSQL(sqlTransaksi)
-        db?.execSQL(sqlTipePs)
-        db?.execSQL(sqlPlaystation)
-        db?.execSQL(sqlProduk)
-        db?.execSQL(sqlDetailSewaPs)
-        db?.execSQL(sqlDetailProduk)
-        db?.execSQL(sqlPembayaran)
-
-        db?.execSQL("INSERT INTO tipe_ps(nama_tipe, harga_sewa) VALUES ('PS3', 5000)")
-        db?.execSQL("INSERT INTO tipe_ps(nama_tipe, harga_sewa) VALUES ('PS4', 7000)")
-        db?.execSQL("INSERT INTO tipe_ps(nama_tipe, harga_sewa) VALUES ('PS5', 10000)")
-
-        db?.execSQL("INSERT INTO playstation(nomor_ps, id_tipe, status_ps) VALUES ('PS-01', 1, 'tersedia')")
-        db?.execSQL("INSERT INTO playstation(nomor_ps, id_tipe, status_ps) VALUES ('PS-02', 2, 'tersedia')")
-        db?.execSQL("INSERT INTO playstation(nomor_ps, id_tipe, status_ps) VALUES ('PS-03', 3, 'tersedia')")
-
-        db?.execSQL("INSERT INTO produk(nama, jenis, harga, stock) VALUES ('Pop Mie', 'Makanan', 7000, 20)")
-        db?.execSQL("INSERT INTO produk(nama, jenis, harga, stock) VALUES ('Es Teh', 'Minuman', 5000, 25)")
-        db?.execSQL("INSERT INTO produk(nama, jenis, harga, stock) VALUES ('Kopi', 'Minuman', 8000, 15)")
+        // Data Default (Seeder)
+        db?.execSQL("INSERT INTO tipe_ps(nama_tipe, harga_sewa) VALUES ('PS3', 5000), ('PS4', 7000), ('PS5', 10000)")
+        db?.execSQL("INSERT INTO playstation(nomor_ps, id_tipe, status_ps) VALUES ('PS-01', 1, 'tersedia'), ('PS-02', 2, 'tersedia'), ('PS-03', 3, 'tersedia')")
+        db?.execSQL("INSERT INTO produk(nama, jenis, harga, stock) VALUES ('Pop Mie', 'Makanan', 7000, 20), ('Es Teh', 'Minuman', 5000, 25)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("DROP TABLE IF EXISTS pembayaran")
         db?.execSQL("DROP TABLE IF EXISTS detail_produk")
         db?.execSQL("DROP TABLE IF EXISTS detail_sewa_ps")
         db?.execSQL("DROP TABLE IF EXISTS produk")
@@ -133,652 +34,347 @@ class DBOpenHelper(context: Context) :
         db?.execSQL("DROP TABLE IF EXISTS user")
         onCreate(db)
     }
-    fun selesaiTransaksiByPs(idPs: Int): Boolean {
-        val db = writableDatabase
-        var berhasil = false
 
-        try {
-            db.beginTransaction()
-
-            val cursor = db.rawQuery(
-                """
-            SELECT tr.id_transaksi
-            FROM transaksi tr
-            INNER JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi
-            WHERE dsp.id_ps = ? AND tr.status_transaksi = 'aktif'
-            ORDER BY tr.id_transaksi DESC
-            LIMIT 1
-            """.trimIndent(),
-                arrayOf(idPs.toString())
-            )
-
-            var idTransaksi = -1
-            if (cursor.moveToFirst()) {
-                idTransaksi = cursor.getInt(cursor.getColumnIndexOrThrow("id_transaksi"))
-            }
-            cursor.close()
-
-            if (idTransaksi != -1) {
-                val valuesTransaksi = android.content.ContentValues()
-                valuesTransaksi.put("status_transaksi", "selesai")
-
-                db.update(
-                    "transaksi",
-                    valuesTransaksi,
-                    "id_transaksi = ?",
-                    arrayOf(idTransaksi.toString())
-                )
-            }
-
-            val valuesPs = android.content.ContentValues()
-            valuesPs.put("status_ps", "tersedia")
-
-            db.update(
-                "playstation",
-                valuesPs,
-                "id_ps = ?",
-                arrayOf(idPs.toString())
-            )
-
-            db.setTransactionSuccessful()
-            berhasil = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            db.endTransaction()
-            db.close()
-        }
-
-        return berhasil
-    }
+    // --- 1. USER & AUTHENTICATION ---
     fun insertUser(nama: String, email: String, noHp: String, password: String, role: String = "customer"): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama", nama)
-        values.put("email", email)
-        values.put("no_hp", noHp)
-        values.put("password", password)
-        values.put("role", role)
-
-        val result = db.insert("user", null, values)
-        db.close()
-        return result != -1L
+        val v = ContentValues().apply { put("nama", nama); put("email", email); put("no_hp", noHp); put("password", password); put("role", role) }
+        return writableDatabase.insert("user", null, v) != -1L
     }
 
     fun checkLogin(email: String, password: String): Boolean {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT * FROM user WHERE email = ? AND password = ?",
-            arrayOf(email, password)
-        )
-
-        val berhasil = cursor.count > 0
-        cursor.close()
-        db.close()
-        return berhasil
+        val c = readableDatabase.rawQuery("SELECT * FROM user WHERE email = ? AND password = ?", arrayOf(email, password))
+        val res = c.count > 0; c.close(); return res
     }
 
     fun checkEmail(email: String): Boolean {
-        val db = readableDatabase
-        val cursor: Cursor = db.rawQuery(
-            "SELECT * FROM user WHERE email = ?",
-            arrayOf(email)
-        )
-
-        val ada = cursor.count > 0
-        cursor.close()
-        db.close()
-        return ada
+        val c = readableDatabase.rawQuery("SELECT * FROM user WHERE email = ?", arrayOf(email))
+        val res = c.count > 0; c.close(); return res
     }
 
-//    CRUD TIPE PS
-    fun insertTipePs(namaTipe: String, hargaSewa: Double): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama_tipe", namaTipe)
-        values.put("harga_sewa", hargaSewa)
-
-        val result = db.insert("tipe_ps", null, values)
-        db.close()
-        return result != -1L
+    fun checkEmailUserLain(email: String, id: Int): Boolean {
+        val c = readableDatabase.rawQuery("SELECT * FROM user WHERE email = ? AND id_user != ?", arrayOf(email, id.toString()))
+        val res = c.count > 0; c.close(); return res
     }
 
-    fun updateTipePs(idTipe: Int, namaTipe: String, hargaSewa: Double): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama_tipe", namaTipe)
-        values.put("harga_sewa", hargaSewa)
-
-        val result = db.update(
-            "tipe_ps",
-            values,
-            "id_tipe = ?",
-            arrayOf(idTipe.toString())
-        )
-        db.close()
-        return result > 0
+    fun getAllUser(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val c = readableDatabase.rawQuery("SELECT * FROM user", null)
+        if (c.moveToFirst()) {
+            do {
+                val m = HashMap<String, String>()
+                m["id_user"] = c.getInt(0).toString()
+                m["nama"] = c.getString(1)
+                m["email"] = c.getString(2)
+                m["no_hp"] = c.getString(3)
+                m["password"] = c.getString(4)
+                m["role"] = c.getString(5)
+                list.add(m)
+            } while (c.moveToNext())
+        }
+        c.close(); return list
     }
 
-    fun deleteTipePs(idTipe: Int): Boolean {
-        val db = writableDatabase
-        val result = db.delete(
-            "tipe_ps",
-            "id_tipe = ?",
-            arrayOf(idTipe.toString())
-        )
-        db.close()
-        return result > 0
+    fun insertPengguna(n: String, e: String, hp: String, p: String, r: String): Boolean = insertUser(n, e, hp, p, r)
+
+    fun updatePengguna(id: Int, n: String, e: String, hp: String, p: String, r: String): Boolean {
+        val v = ContentValues().apply { put("nama", n); put("email", e); put("no_hp", hp); put("password", p); put("role", r) }
+        return writableDatabase.update("user", v, "id_user = ?", arrayOf(id.toString())) > 0
     }
 
+    fun deleteUser(id: Int): Boolean {
+        val db = this.writableDatabase
+        // Ganti 'user' dengan nama tabel usermu, dan 'id_user' dengan nama kolom ID-nya
+        val hasil = db.delete("user", "id_user = ?", arrayOf(id.toString()))
+        return hasil > 0
+    }
+
+    // --- 2. TIPE PS ---
     fun getAllTipePs(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM tipe_ps ORDER BY id_tipe DESC", null)
-
-        if (cursor.moveToFirst()) {
+        val c = readableDatabase.rawQuery("SELECT * FROM tipe_ps", null)
+        if (c.moveToFirst()) {
             do {
-                val item = HashMap<String, String>()
-                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
-                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
-                item["harga_sewa"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga_sewa")).toString()
-                list.add(item)
-            } while (cursor.moveToNext())
+                val m = HashMap<String, String>()
+                m["id_tipe"] = c.getInt(0).toString()
+                m["nama_tipe"] = c.getString(1)
+                m["harga_sewa"] = c.getDouble(2).toString()
+                list.add(m)
+            } while (c.moveToNext())
         }
-
-        cursor.close()
-        db.close()
-        return list
+        c.close(); return list
     }
 
-//    kelola data ps
-fun insertPlaystation(nomorPs: String, idTipe: Int, statusPs: String): Boolean {
-    val db = writableDatabase
-    val values = ContentValues()
-    values.put("nomor_ps", nomorPs)
-    values.put("id_tipe", idTipe)
-    values.put("status_ps", statusPs)
+    fun getAllTipePsForSpinner(): ArrayList<HashMap<String, String>> = getAllTipePs()
 
-    val result = db.insert("playstation", null, values)
-    db.close()
-    return result != -1L
-}
-
-    fun updatePlaystation(idPs: Int, nomorPs: String, idTipe: Int, statusPs: String): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("nomor_ps", nomorPs)
-        values.put("id_tipe", idTipe)
-        values.put("status_ps", statusPs)
-
-        val result = db.update(
-            "playstation",
-            values,
-            "id_ps = ?",
-            arrayOf(idPs.toString())
-        )
-        db.close()
-        return result > 0
+    fun getHargaSewaByNamaTipe(n: String): Double {
+        val c = readableDatabase.rawQuery("SELECT harga_sewa FROM tipe_ps WHERE nama_tipe = ?", arrayOf(n))
+        var h = 0.0; if (c.moveToFirst()) h = c.getDouble(0); c.close(); return h
     }
 
-    fun deletePlaystation(idPs: Int): Boolean {
-        val db = writableDatabase
-        val result = db.delete(
-            "playstation",
-            "id_ps = ?",
-            arrayOf(idPs.toString())
-        )
-        db.close()
-        return result > 0
+    fun insertTipePs(n: String, h: Double): Boolean {
+        val v = ContentValues().apply { put("nama_tipe", n); put("harga_sewa", h) }
+        return writableDatabase.insert("tipe_ps", null, v) != -1L
     }
 
+    fun updateTipePs(id: Int, n: String, h: Double): Boolean {
+        val v = ContentValues().apply { put("nama_tipe", n); put("harga_sewa", h) }
+        return writableDatabase.update("tipe_ps", v, "id_tipe = ?", arrayOf(id.toString())) > 0
+    }
+
+    fun deleteTipePs(id: Int): Boolean = writableDatabase.delete("tipe_ps", "id_tipe = ?", arrayOf(id.toString())) > 0
+
+    // --- 3. PLAYSTATION ---
     fun getAllPlaystation(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
-        val db = readableDatabase
-
-        val sql = """
-        SELECT p.id_ps, p.nomor_ps, p.id_tipe, p.status_ps, t.nama_tipe
-        FROM playstation p
-        INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe
-        ORDER BY p.id_ps DESC
-    """.trimIndent()
-
-        val cursor = db.rawQuery(sql, null)
-
-        if (cursor.moveToFirst()) {
+        val sql = "SELECT p.id_ps, p.nomor_ps, p.id_tipe, p.status_ps, t.nama_tipe FROM playstation p INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe"
+        val c = readableDatabase.rawQuery(sql, null)
+        if (c.moveToFirst()) {
             do {
-                val item = HashMap<String, String>()
-                item["id_ps"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_ps")).toString()
-                item["nomor_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("nomor_ps"))
-                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
-                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
-                item["status_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("status_ps"))
-                list.add(item)
-            } while (cursor.moveToNext())
+                val m = HashMap<String, String>()
+                m["id_ps"] = c.getInt(0).toString()
+                m["nomor_ps"] = c.getString(1)
+                m["id_tipe"] = c.getInt(2).toString()
+                m["status_ps"] = c.getString(3)
+                m["nama_tipe"] = c.getString(4)
+                list.add(m)
+            } while (c.moveToNext())
         }
-
-        cursor.close()
-        db.close()
-        return list
+        c.close(); return list
     }
 
-    fun getAllTipePsForSpinner(): ArrayList<HashMap<String, String>> {
-        val list = ArrayList<HashMap<String, String>>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM tipe_ps ORDER BY nama_tipe ASC", null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val item = HashMap<String, String>()
-                item["id_tipe"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_tipe")).toString()
-                item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
-                list.add(item)
-            } while (cursor.moveToNext())
-        }
-
-        cursor.close()
-        db.close()
-        return list
+    fun insertPlaystation(no: String, idT: Int, stat: String): Boolean {
+        val v = ContentValues().apply { put("nomor_ps", no); put("id_tipe", idT); put("status_ps", stat) }
+        return writableDatabase.insert("playstation", null, v) != -1L
     }
 
+    fun updatePlaystation(id: Int, no: String, idT: Int, stat: String): Boolean {
+        val v = ContentValues().apply { put("nomor_ps", no); put("id_tipe", idT); put("status_ps", stat) }
+        return writableDatabase.update("playstation", v, "id_ps = ?", arrayOf(id.toString())) > 0
+    }
 
-//    kelola produk
-fun insertProduk(nama: String, jenis: String, harga: Double, stock: Int): Boolean {
-    val db = writableDatabase
-    val values = ContentValues()
-    values.put("nama", nama)
-    values.put("jenis", jenis)
-    values.put("harga", harga)
-    values.put("stock", stock)
-
-    val result = db.insert("produk", null, values)
-    db.close()
-    return result != -1L
-}
-
-    fun updateProduk(idProduk: Int, nama: String, jenis: String, harga: Double, stock: Int): Boolean {
+    fun deletePlaystation(id: Int): Boolean {
         val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama", nama)
-        values.put("jenis", jenis)
-        values.put("harga", harga)
-        values.put("stock", stock)
-
-        val result = db.update(
-            "produk",
-            values,
-            "id_produk = ?",
-            arrayOf(idProduk.toString())
-        )
-        db.close()
-        return result > 0
+        return db.delete("playstation", "id_ps = ?", arrayOf(id.toString())) > 0
+    }
+    fun updateStatusPs(id: Int, stat: String): Boolean {
+        val v = ContentValues().apply { put("status_ps", stat) }
+        return writableDatabase.update("playstation", v, "id_ps = ?", arrayOf(id.toString())) > 0
     }
 
-    fun deleteProduk(idProduk: Int): Boolean {
-        val db = writableDatabase
-        val result = db.delete(
-            "produk",
-            "id_produk = ?",
-            arrayOf(idProduk.toString())
-        )
-        db.close()
-        return result > 0
-    }
-
+    // --- 4. PRODUK ---
     fun getAllProduk(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM produk ORDER BY id_produk DESC", null)
-
-        if (cursor.moveToFirst()) {
+        val c = readableDatabase.rawQuery("SELECT * FROM produk", null)
+        if (c.moveToFirst()) {
             do {
-                val item = HashMap<String, String>()
-                item["id_produk"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_produk")).toString()
-                item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
-                item["jenis"] = cursor.getString(cursor.getColumnIndexOrThrow("jenis"))
-                item["harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga")).toString()
-                item["stock"] = cursor.getInt(cursor.getColumnIndexOrThrow("stock")).toString()
-                list.add(item)
-            } while (cursor.moveToNext())
+                val m = HashMap<String, String>()
+                m["id_produk"] = c.getInt(0).toString()
+                m["nama"] = c.getString(1)
+                m["jenis"] = c.getString(2)
+                m["harga"] = c.getDouble(3).toString()
+                m["stock"] = c.getInt(4).toString()
+                list.add(m)
+            } while (c.moveToNext())
         }
-
-        cursor.close()
-        db.close()
-        return list
+        c.close(); return list
     }
 
+    fun getAllProdukSpinner(): ArrayList<HashMap<String, String>> = getAllProduk()
 
-//    kelola pengguna
-fun getAllUser(): ArrayList<HashMap<String, String>> {
-    val list = ArrayList<HashMap<String, String>>()
-    val db = readableDatabase
-    val cursor = db.rawQuery("SELECT * FROM user ORDER BY id_user DESC", null)
-
-    if (cursor.moveToFirst()) {
-        do {
-            val item = HashMap<String, String>()
-            item["id_user"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_user")).toString()
-            item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
-            item["email"] = cursor.getString(cursor.getColumnIndexOrThrow("email"))
-            item["no_hp"] = cursor.getString(cursor.getColumnIndexOrThrow("no_hp"))
-            item["password"] = cursor.getString(cursor.getColumnIndexOrThrow("password"))
-            item["role"] = cursor.getString(cursor.getColumnIndexOrThrow("role"))
-            list.add(item)
-        } while (cursor.moveToNext())
+    fun insertProduk(n: String, j: String, h: Double, s: Int): Boolean {
+        val v = ContentValues().apply { put("nama", n); put("jenis", j); put("harga", h); put("stock", s) }
+        return writableDatabase.insert("produk", null, v) != -1L
     }
 
-    cursor.close()
-    db.close()
-    return list
-}
+    fun updateProduk(id: Int, n: String, j: String, h: Double, s: Int): Boolean {
+        val v = ContentValues().apply { put("nama", n); put("jenis", j); put("harga", h); put("stock", s) }
+        return writableDatabase.update("produk", v, "id_produk = ?", arrayOf(id.toString())) > 0
+    }
 
-    fun insertPengguna(nama: String, email: String, noHp: String, password: String, role: String): Boolean {
+    fun deleteProduk(id: Int): Boolean {
         val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama", nama)
-        values.put("email", email)
-        values.put("no_hp", noHp)
-        values.put("password", password)
-        values.put("role", role)
-
-        val result = db.insert("user", null, values)
-        db.close()
-        return result != -1L
+        return db.delete("produk", "id_produk = ?", arrayOf(id.toString())) > 0
     }
-
-    fun updatePengguna(
-        idUser: Int,
-        nama: String,
-        email: String,
-        noHp: String,
-        password: String,
-        role: String
-    ): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("nama", nama)
-        values.put("email", email)
-        values.put("no_hp", noHp)
-        values.put("password", password)
-        values.put("role", role)
-
-        val result = db.update(
-            "user",
-            values,
-            "id_user = ?",
-            arrayOf(idUser.toString())
-        )
-        db.close()
-        return result > 0
-    }
-
-    fun deletePengguna(idUser: Int): Boolean {
-        val db = writableDatabase
-        val result = db.delete(
-            "user",
-            "id_user = ?",
-            arrayOf(idUser.toString())
-        )
-        db.close()
-        return result > 0
-    }
-
-    fun checkEmailUserLain(email: String, idUser: Int): Boolean {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT * FROM user WHERE email = ? AND id_user != ?",
-            arrayOf(email, idUser.toString())
-        )
-
-        val ada = cursor.count > 0
-        cursor.close()
-        db.close()
-        return ada
-    }
-
-
-
-
-
-//    monitoring
-fun getMonitoringPs(): ArrayList<HashMap<String, String>> {
-    val list = ArrayList<HashMap<String, String>>()
-    val db = readableDatabase
-
-    val sql = """
-        SELECT 
-            p.id_ps,
-            p.nomor_ps,
-            p.status_ps,
-            t.nama_tipe,
-            dsp.jam_mulai,
-            dsp.jam_selesai,
-            tr.id_transaksi,
-            tr.status_transaksi
-        FROM playstation p
-        INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe
-        LEFT JOIN detail_sewa_ps dsp ON p.id_ps = dsp.id_ps
-        LEFT JOIN transaksi tr ON dsp.id_transaksi = tr.id_transaksi
-        ORDER BY p.id_ps ASC
+    // --- 5. MONITORING & TRANSAKSI ---
+    fun getMonitoringPs(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val sql = """
+        SELECT p.id_ps, p.nomor_ps, t.nama_tipe, p.status_ps, dsp.jam_mulai, dsp.jam_selesai 
+        FROM playstation p 
+        INNER JOIN tipe_ps t ON p.id_tipe = t.id_tipe 
+        LEFT JOIN (
+            SELECT id_ps, jam_mulai, jam_selesai 
+            FROM detail_sewa_ps 
+            WHERE id_dt_booking IN (SELECT MAX(id_dt_booking) FROM detail_sewa_ps GROUP BY id_ps)
+        ) dsp ON p.id_ps = dsp.id_ps
     """.trimIndent()
 
-    val cursor = db.rawQuery(sql, null)
-
-    if (cursor.moveToFirst()) {
-        do {
-            val item = HashMap<String, String>()
-            item["id_ps"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_ps")).toString()
-            item["nomor_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("nomor_ps"))
-            item["status_ps"] = cursor.getString(cursor.getColumnIndexOrThrow("status_ps"))
-            item["nama_tipe"] = cursor.getString(cursor.getColumnIndexOrThrow("nama_tipe"))
-
-            val jamMulaiIndex = cursor.getColumnIndex("jam_mulai")
-            val jamSelesaiIndex = cursor.getColumnIndex("jam_selesai")
-            val idTransaksiIndex = cursor.getColumnIndex("id_transaksi")
-            val statusTransaksiIndex = cursor.getColumnIndex("status_transaksi")
-
-            item["jam_mulai"] =
-                if (jamMulaiIndex >= 0 && !cursor.isNull(jamMulaiIndex)) cursor.getString(jamMulaiIndex) else ""
-
-            item["jam_selesai"] =
-                if (jamSelesaiIndex >= 0 && !cursor.isNull(jamSelesaiIndex)) cursor.getString(jamSelesaiIndex) else ""
-
-            item["id_transaksi"] =
-                if (idTransaksiIndex >= 0 && !cursor.isNull(idTransaksiIndex)) cursor.getInt(idTransaksiIndex).toString() else ""
-
-            item["status_transaksi"] =
-                if (statusTransaksiIndex >= 0 && !cursor.isNull(statusTransaksiIndex)) cursor.getString(statusTransaksiIndex) else ""
-
-            list.add(item)
-        } while (cursor.moveToNext())
-    }
-
-    cursor.close()
-    db.close()
-    return list
-}
-
-// transaksi
-fun insertTransaksi(
-    idUser: Int,
-    tanggal: String,
-    totalHarga: Double,
-    statusTransaksi: String
-): Long {
-    val db = writableDatabase
-    val values = ContentValues()
-    values.put("id_user", idUser)
-    values.put("tanggal", tanggal)
-    values.put("total_harga", totalHarga)
-    values.put("status_transaksi", statusTransaksi)
-
-    val result = db.insert("transaksi", null, values)
-    db.close()
-    return result
-}
-
-    fun insertDetailSewaPs(
-        idTransaksi: Long,
-        idPs: Int,
-        durasi: Int,
-        jamMulai: String,
-        jamSelesai: String,
-        typePs: String,
-        hargaPerJam: Double,
-        subtotal: Double
-    ): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("id_transaksi", idTransaksi)
-        values.put("id_ps", idPs)
-        values.put("durasi", durasi)
-        values.put("jam_mulai", jamMulai)
-        values.put("jam_selesai", jamSelesai)
-        values.put("type_ps", typePs)
-        values.put("harga_perjam", hargaPerJam)
-        values.put("subtotal", subtotal)
-
-        val result = db.insert("detail_sewa_ps", null, values)
-        db.close()
-        return result != -1L
-    }
-
-    fun insertDetailProduk(
-        idTransaksi: Long,
-        idProduk: Int,
-        qty: Int,
-        subtotal: Double
-    ): Boolean {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put("id_transaksi", idTransaksi)
-        values.put("id_produk", idProduk)
-        values.put("qty", qty)
-        values.put("subtotal", subtotal)
-
-        val result = db.insert("detail_produk", null, values)
-        db.close()
-        return result != -1L
-    }
-
-    fun getAllProdukSpinner(): ArrayList<HashMap<String, String>> {
-        val list = ArrayList<HashMap<String, String>>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM produk ORDER BY nama ASC", null)
-
-        if (cursor.moveToFirst()) {
+        val c = readableDatabase.rawQuery(sql, null)
+        if (c.moveToFirst()) {
             do {
-                val item = HashMap<String, String>()
-                item["id_produk"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_produk")).toString()
-                item["nama"] = cursor.getString(cursor.getColumnIndexOrThrow("nama"))
-                item["jenis"] = cursor.getString(cursor.getColumnIndexOrThrow("jenis"))
-                item["harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("harga")).toString()
-                item["stock"] = cursor.getInt(cursor.getColumnIndexOrThrow("stock")).toString()
-                list.add(item)
-            } while (cursor.moveToNext())
+                val m = HashMap<String, String>()
+                m["id_ps"] = c.getString(0)      // Benar
+                m["nomor_ps"] = c.getString(1)   // Benar
+                m["nama_tipe"] = c.getString(2)  // SEBELUMNYA index 4 (Salah)
+                m["status_ps"] = c.getString(3)  // SEBELUMNYA index 3 (Benar)
+                m["jam_mulai"] = c.getString(4) ?: "" // SEBELUMNYA index 5 (Salah)
+                m["jam_selesai"] = c.getString(5) ?: "" // SEBELUMNYA index 6 (Salah - Index 6 ga ada!)
+                list.add(m)
+            } while (c.moveToNext())
         }
-
-        cursor.close()
-        db.close()
+        c.close()
         return list
     }
 
-    fun getHargaSewaByNamaTipe(namaTipe: String): Double {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT harga_sewa FROM tipe_ps WHERE nama_tipe = ?",
-            arrayOf(namaTipe)
-        )
-
-        var harga = 0.0
-        if (cursor.moveToFirst()) {
-            harga = cursor.getDouble(cursor.getColumnIndexOrThrow("harga_sewa"))
-        }
-
-        cursor.close()
-        db.close()
-        return harga
-    }
-
-    fun updateStatusPs(idPs: Int, statusPs: String): Boolean {
+    fun selesaiTransaksiByPs(idPs: Int): Boolean {
         val db = writableDatabase
-        val values = ContentValues()
-        values.put("status_ps", statusPs)
-
-        val result = db.update(
-            "playstation",
-            values,
-            "id_ps = ?",
-            arrayOf(idPs.toString())
-        )
-        db.close()
-        return result > 0
+        val v = ContentValues()
+        v.put("status_ps", "tersedia")
+        // Mengubah status PS berdasarkan ID-nya
+        return db.update("playstation", v, "id_ps = ?", arrayOf(idPs.toString())) > 0
+    }
+    fun insertTransaksi(idU: Int, tgl: String, tot: Double, stat: String): Long {
+        val v = ContentValues().apply { put("id_user", idU); put("tanggal", tgl); put("total_harga", tot); put("status_transaksi", stat) }
+        return writableDatabase.insert("transaksi", null, v)
     }
 
+    fun insertDetailSewaPs(idT: Long, idPs: Int, dur: Int, m: String, s: String, tipe: String, h: Double, sub: Double): Boolean {
+        val v = ContentValues().apply { put("id_transaksi", idT); put("id_ps", idPs); put("durasi", dur); put("jam_mulai", m); put("jam_selesai", s); put("type_ps", tipe); put("harga_perjam", h); put("subtotal", sub) }
+        return writableDatabase.insert("detail_sewa_ps", null, v) != -1L
+    }
 
-//   riwayat
-fun getAllRiwayatTransaksi(): ArrayList<HashMap<String, String>> {
-    val list = ArrayList<HashMap<String, String>>()
-    val db = readableDatabase
+    fun insertDetailProduk(idT: Long, idP: Int, q: Int, sub: Double): Boolean {
+        val v = ContentValues().apply { put("id_transaksi", idT); put("id_produk", idP); put("qty", q); put("subtotal", sub) }
+        return writableDatabase.insert("detail_produk", null, v) != -1L
+    }
+    // TAMBAHKAN INI DI DBOpenHelper.kt (Wajib!)
+    fun getAllRiwayatTransaksi(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
 
-    val sql = """
-        SELECT 
-            tr.id_transaksi,
-            tr.tanggal,
-            tr.total_harga,
-            tr.status_transaksi,
-            p.nomor_ps,
-            dsp.jam_mulai,
-            dsp.jam_selesai,
-            dsp.durasi,
-            dsp.type_ps
-        FROM transaksi tr
-        LEFT JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi
-        LEFT JOIN playstation p ON dsp.id_ps = p.id_ps
+        // Ambil tanggal hari ini dalam format yang sama saat simpan (yyyy-MM-dd)
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val tglHariIni = sdf.format(java.util.Date())
+
+        val sql = """
+        SELECT tr.id_transaksi, tr.tanggal, tr.total_harga, tr.status_transaksi, 
+               p.nomor_ps, dsp.type_ps, dsp.jam_mulai, dsp.jam_selesai, dsp.durasi
+        FROM transaksi tr 
+        LEFT JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi 
+        LEFT JOIN playstation p ON dsp.id_ps = p.id_ps 
+        WHERE tr.tanggal = ?
         ORDER BY tr.id_transaksi DESC
     """.trimIndent()
 
-    val cursor = db.rawQuery(sql, null)
+        val c = readableDatabase.rawQuery(sql, arrayOf(tglHariIni))
+        if (c.moveToFirst()) {
+            do {
+                val m = HashMap<String, String>()
+                m["id_transaksi"] = c.getString(0)
+                m["tanggal"] = c.getString(1)
+                m["total_harga"] = c.getString(2)
+                m["status_transaksi"] = c.getString(3)
+                m["nomor_ps"] = c.getString(4) ?: "-"
+                m["type_ps"] = c.getString(5) ?: "-"
+                m["jam"] = "${c.getString(6) ?: ""} - ${c.getString(7) ?: ""}"
+                m["durasi"] = c.getString(8) ?: "0"
+                list.add(m)
+            } while (c.moveToNext())
+        }
+        c.close()
+        return list
+    }
+    // Tambahkan ini di DBOpenHelper.kt
+    fun getAllTransaksiAktif(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val sql = """
+        SELECT tr.id_transaksi, tr.tanggal, tr.total_harga, tr.status_transaksi, 
+               p.nomor_ps, dsp.type_ps, dsp.jam_mulai, dsp.jam_selesai, dsp.durasi, p.id_ps
+        FROM transaksi tr 
+        INNER JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi 
+        INNER JOIN playstation p ON dsp.id_ps = p.id_ps 
+        WHERE tr.status_transaksi = 'aktif' 
+        ORDER BY tr.id_transaksi DESC
+    """.trimIndent()
 
-    if (cursor.moveToFirst()) {
-        do {
-            val item = HashMap<String, String>()
-            item["id_transaksi"] = cursor.getInt(cursor.getColumnIndexOrThrow("id_transaksi")).toString()
-            item["tanggal"] = cursor.getString(cursor.getColumnIndexOrThrow("tanggal"))
-            item["total_harga"] = cursor.getDouble(cursor.getColumnIndexOrThrow("total_harga")).toString()
-            item["status_transaksi"] = cursor.getString(cursor.getColumnIndexOrThrow("status_transaksi"))
-
-            val nomorPsIndex = cursor.getColumnIndex("nomor_ps")
-            val jamMulaiIndex = cursor.getColumnIndex("jam_mulai")
-            val jamSelesaiIndex = cursor.getColumnIndex("jam_selesai")
-            val durasiIndex = cursor.getColumnIndex("durasi")
-            val typePsIndex = cursor.getColumnIndex("type_ps")
-
-            item["nomor_ps"] =
-                if (nomorPsIndex >= 0 && !cursor.isNull(nomorPsIndex)) cursor.getString(nomorPsIndex) else "-"
-
-            item["jam_mulai"] =
-                if (jamMulaiIndex >= 0 && !cursor.isNull(jamMulaiIndex)) cursor.getString(jamMulaiIndex) else "-"
-
-            item["jam_selesai"] =
-                if (jamSelesaiIndex >= 0 && !cursor.isNull(jamSelesaiIndex)) cursor.getString(jamSelesaiIndex) else "-"
-
-            item["durasi"] =
-                if (durasiIndex >= 0 && !cursor.isNull(durasiIndex)) cursor.getInt(durasiIndex).toString() else "0"
-
-            item["type_ps"] =
-                if (typePsIndex >= 0 && !cursor.isNull(typePsIndex)) cursor.getString(typePsIndex) else "-"
-
-            list.add(item)
-        } while (cursor.moveToNext())
+        val c = readableDatabase.rawQuery(sql, null)
+        if (c.moveToFirst()) {
+            do {
+                val m = HashMap<String, String>()
+                m["id_transaksi"] = c.getString(0)
+                m["total_harga"] = c.getString(2)
+                m["nomor_ps"] = c.getString(4)
+                m["type_ps"] = c.getString(5)
+                m["jam"] = "${c.getString(6)} - ${c.getString(7)}"
+                m["durasi"] = "Durasi: ${c.getString(8)} jam"
+                m["id_ps"] = c.getString(9) // Ambil ID PS-nya di sini
+                list.add(m)
+            } while (c.moveToNext())
+        }
+        c.close()
+        return list
+    }
+    fun updateStatusTransaksi(id: Int, status: String): Boolean {
+        val db = writableDatabase
+        val v = android.content.ContentValues()
+        v.put("status_transaksi", status)
+        return db.update("transaksi", v, "id_transaksi = ?", arrayOf(id.toString())) > 0
     }
 
-    cursor.close()
-    db.close()
-    return list
-}
+    fun getTotalPendapatanHariIni(): Double {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val tglHariIni = sdf.format(java.util.Date())
 
+        var total = 0.0
+        val c = readableDatabase.rawQuery(
+            "SELECT SUM(total_harga) FROM transaksi WHERE tanggal = ? AND status_transaksi = 'selesai'",
+            arrayOf(tglHariIni)
+        )
+        if (c.moveToFirst()) total = c.getDouble(0)
+        c.close()
+        return total
+    }
+    fun getLaporanHarian(): ArrayList<HashMap<String, String>> {
+        val list = ArrayList<HashMap<String, String>>()
+        val tglHariIni = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+
+        val sql = """
+        SELECT tr.id_transaksi, tr.tanggal, tr.total_harga, tr.status_transaksi, 
+               p.nomor_ps, dsp.type_ps, dsp.jam_mulai, dsp.jam_selesai, dsp.durasi
+        FROM transaksi tr 
+        INNER JOIN detail_sewa_ps dsp ON tr.id_transaksi = dsp.id_transaksi 
+        INNER JOIN playstation p ON dsp.id_ps = p.id_ps 
+        WHERE tr.tanggal = ? AND tr.status_transaksi = 'selesai'
+        ORDER BY tr.id_transaksi DESC
+    """.trimIndent()
+
+        val c = readableDatabase.rawQuery(sql, arrayOf(tglHariIni))
+        if (c.moveToFirst()) {
+            do {
+                val m = HashMap<String, String>()
+                m["id_transaksi"] = c.getString(0)
+                m["tanggal"] = c.getString(1)
+                m["total_harga"] = c.getString(2)
+                m["status_transaksi"] = c.getString(3)
+                m["nomor_ps"] = c.getString(4) ?: "-"
+                m["type_ps"] = c.getString(5) ?: "-"
+                m["jam"] = "${c.getString(6) ?: ""} - ${c.getString(7) ?: ""}"
+                m["durasi"] = c.getString(8) ?: "0"
+                list.add(m)
+            } while (c.moveToNext())
+        }
+        c.close()
+        return list
+    }
+    fun getTotalOmzetHariIni(): Double {
+        val tgl = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        var total = 0.0
+        val c = readableDatabase.rawQuery("SELECT SUM(total_harga) FROM transaksi WHERE tanggal = ? AND status_transaksi = 'selesai'", arrayOf(tgl))
+        if (c.moveToFirst()) total = c.getDouble(0)
+        c.close()
+        return total
+    }
     companion object {
-        private const val DB_NAME = "rental_ps.db"
+        private const val DB_NAME = "siperpsa_clean.db"
         private const val DB_VERSION = 1
     }
 }
