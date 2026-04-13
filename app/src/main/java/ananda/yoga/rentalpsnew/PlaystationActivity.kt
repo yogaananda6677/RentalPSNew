@@ -1,5 +1,7 @@
 package ananda.yoga.rentalpsnew
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -26,11 +28,12 @@ class PlaystationActivity : AppCompatActivity() {
     }
 
     fun tampilData() {
-        listData = db.getAllPlaystation()
+        // Menggunakan fungsi yang sudah kita buat di DBOpenHelper
+        listData = db.getMonitoringPs()
 
         val adapter = SimpleAdapter(
             this, listData, R.layout.item_playstation,
-            arrayOf("nomor_ps", "nama_tipe", "status_ps", "id_ps"), // Tambah id_ps untuk menu
+            arrayOf("nomor_ps", "nama_tipe", "status_ps", "id_ps"),
             intArrayOf(R.id.text1, R.id.text2, R.id.tvStatusBadge, R.id.btnMenuPs)
         )
 
@@ -41,19 +44,18 @@ class PlaystationActivity : AppCompatActivity() {
                     val tv = view as TextView
                     tv.text = status.uppercase()
 
-                    // Logic warna badge minimalis
                     when (status.lowercase()) {
                         "maintenance" -> {
-                            tv.setTextColor(android.graphics.Color.parseColor("#DC2626"))
-                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FEE2E2"))
+                            tv.setTextColor(Color.parseColor("#DC2626"))
+                            tv.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#FEE2E2"))
                         }
                         "dipakai" -> {
-                            tv.setTextColor(android.graphics.Color.parseColor("#2563EB"))
-                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EFF6FF"))
+                            tv.setTextColor(Color.parseColor("#2563EB"))
+                            tv.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#EFF6FF"))
                         }
                         "tersedia" -> {
-                            tv.setTextColor(android.graphics.Color.parseColor("#16A34A"))
-                            tv.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DCFCE7"))
+                            tv.setTextColor(Color.parseColor("#16A34A"))
+                            tv.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#DCFCE7"))
                         }
                     }
                     true
@@ -91,8 +93,11 @@ class PlaystationActivity : AppCompatActivity() {
         val spTipe = view.findViewById<Spinner>(R.id.spTipePs)
         val spStatus = view.findViewById<Spinner>(R.id.spStatusPs)
 
-        val listTipe = db.getAllTipePsForSpinner()
-        val adapterTipe = ArrayAdapter(this, R.layout.item_spinner_custom, listTipe.map { it["nama_tipe"] })
+        // Mengambil data tipe untuk Spinner
+        val listTipe = db.getAllTipePs()
+        val namaTipe = listTipe.map { it["nama_tipe"].toString() }
+
+        val adapterTipe = ArrayAdapter(this, android.R.layout.simple_spinner_item, namaTipe)
         adapterTipe.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spTipe.adapter = adapterTipe
 
@@ -104,7 +109,10 @@ class PlaystationActivity : AppCompatActivity() {
                 if (nomor.isNotEmpty() && listTipe.isNotEmpty()) {
                     val idTipe = listTipe[spTipe.selectedItemPosition]["id_tipe"]!!.toInt()
                     val status = spStatus.selectedItem.toString()
-                    if (db.insertPlaystation(nomor, idTipe, status)) tampilData()
+                    if (db.insertPlaystation(nomor, idTipe, status)) {
+                        tampilData()
+                        Toast.makeText(this, "Berhasil simpan", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }.setNegativeButton("Batal", null).show()
     }
@@ -115,13 +123,16 @@ class PlaystationActivity : AppCompatActivity() {
         val spTipe = view.findViewById<Spinner>(R.id.spTipePs)
         val spStatus = view.findViewById<Spinner>(R.id.spStatusPs)
 
-        val listTipe = db.getAllTipePsForSpinner()
-        val adapterTipe = ArrayAdapter(this, R.layout.item_spinner_custom, listTipe.map { it["nama_tipe"] })
+        val listTipe = db.getAllTipePs()
+        val namaTipe = listTipe.map { it["nama_tipe"].toString() }
+
+        val adapterTipe = ArrayAdapter(this, android.R.layout.simple_spinner_item, namaTipe)
         adapterTipe.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spTipe.adapter = adapterTipe
 
         edtNomor.setText(item["nomor_ps"])
 
+        // Cari posisi tipe PS yang sedang diedit
         val posTipe = listTipe.indexOfFirst { it["id_tipe"] == item["id_tipe"] }
         if (posTipe >= 0) spTipe.setSelection(posTipe)
 
@@ -133,8 +144,11 @@ class PlaystationActivity : AppCompatActivity() {
             .setTitle("Edit Unit PS")
             .setView(view)
             .setPositiveButton("Update") { _, _ ->
+                val idPs = item["id_ps"]!!.toInt()
                 val idTipe = listTipe[spTipe.selectedItemPosition]["id_tipe"]!!.toInt()
-                if (db.updatePlaystation(item["id_ps"]!!.toInt(), edtNomor.text.toString(), idTipe, spStatus.selectedItem.toString())) {
+                val status = spStatus.selectedItem.toString()
+
+                if (db.updatePlaystation(idPs, edtNomor.text.toString(), idTipe, status)) {
                     tampilData()
                     Toast.makeText(this, "Berhasil diperbarui", Toast.LENGTH_SHORT).show()
                 }
@@ -147,7 +161,8 @@ class PlaystationActivity : AppCompatActivity() {
             .setTitle("Hapus Unit")
             .setMessage("Yakin ingin menghapus ${item["nomor_ps"]}?")
             .setPositiveButton("Ya, Hapus") { _, _ ->
-                if (db.deletePlaystation(item["id_ps"]!!.toInt())) {
+                val idPs = item["id_ps"]!!.toInt()
+                if (db.deletePlaystation(idPs)) {
                     Toast.makeText(this, "Berhasil dihapus", Toast.LENGTH_SHORT).show()
                     tampilData()
                 }

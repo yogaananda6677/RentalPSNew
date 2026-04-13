@@ -3,26 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Data Tipe PS"
+        android:textColor="#2563EB"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/etNamaTipe"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="Nama Tipe (Contoh: PS 5)"
+        android:padding="10dp"
+        android:completionThreshold="1" />
 
     <EditText
-        android:id="@+id/edtNamaTipe"
+        android:id="@+id/etHargaSewa"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_edittext_modern"
-        android:hint="Nama tipe PS"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
-
-    <EditText
-        android:id="@+id/edtHargaSewa"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/bg_edittext_modern"
-        android:hint="Harga sewa"
-        android:inputType="numberDecimal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
+        android:layout_height="50dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="Harga Sewa per Jam"
+        android:inputType="number"
+        android:padding="10dp" />
 
 </LinearLayout>

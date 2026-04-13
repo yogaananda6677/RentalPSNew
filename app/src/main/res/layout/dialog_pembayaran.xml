@@ -3,86 +3,104 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@android:color/white">
+    android:padding="24dp">
 
+    <!-- Judul -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="RINGKASAN PEMBAYARAN"
-        android:textColor="#94A3B8"
-        android:textSize="11sp"
-        android:textStyle="bold" />
+        android:text="Proses Pembayaran"
+        android:textColor="#0F172A"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
 
+    <!-- Total tagihan -->
     <TextView
         android:id="@+id/tvTotalDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Total: Rp 0"
+        android:text="Tagihan: Rp 0"
         android:textColor="#0F172A"
-        android:textSize="26sp"
-        android:fontFamily="sans-serif-black" />
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="20dp"
-        android:background="#F1F5F9" />
-
+    <!-- Pilih Metode Pembayaran -->
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Metode Pembayaran"
+        android:textColor="#64748B"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/rgMetode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="MASUKKAN UANG TUNAI"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp">
+
+        <RadioButton
+            android:id="@+id/rbCash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="💵 Cash"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/rbEWallet"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📱 E-Wallet"
+            android:textSize="15sp" />
+    </RadioGroup>
+
+    <!-- Input uang bayar (muncul hanya untuk Cash, tapi tetap ada untuk validasi) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Uang Dibayar"
         android:textColor="#64748B"
-        android:textSize="11sp"
-        android:textStyle="bold" />
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="6dp" />
 
     <EditText
         android:id="@+id/edtUangBayar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/bg_input"
-        android:hint="Contoh: 50000"
-        android:inputType="number"
+        android:layout_height="54dp"
+        android:hint="Masukkan nominal..."
+        android:inputType="numberDecimal"
         android:paddingStart="16dp"
-        android:textSize="16sp" />
+        android:textSize="15sp"
+        android:background="@drawable/bg_input"
+        android:layout_marginBottom="12dp" />
 
+    <!-- Kembalian (real-time) -->
+    <TextView
+        android:id="@+id/tvKembalianDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Tombol Bayar -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnHitungKembali"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="52dp"
         android:background="@drawable/bg_button_gradient"
-        android:text="CEK KEMBALIAN"
+        android:text="BAYAR SEKARANG"
         android:textColor="#FFFFFF"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:background="#DCFCE7"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="KEMBALIAN"
-            android:textColor="#16A34A"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvKembalianDialog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rp 0"
-            android:textColor="#16A34A"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-black" />
-    </LinearLayout>
+        android:textStyle="bold"
+        android:textSize="15sp" />
 
 </LinearLayout>

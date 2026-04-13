@@ -28,6 +28,7 @@ class MenuLainFragment : Fragment(), View.OnClickListener {
         b.cardPlaystation.setOnClickListener(this)
         b.cardProduk.setOnClickListener(this)
         b.cardUser.setOnClickListener(this)
+        b.cardProfile.setOnClickListener(this) // TAMBAHKAN INI
     }
 
     override fun onClick(v: View?) {
@@ -46,6 +47,9 @@ class MenuLainFragment : Fragment(), View.OnClickListener {
 
             R.id.cardUser -> {
                 startActivity(Intent(requireContext(), UserActivity::class.java))
+            }
+            R.id.cardProfile -> { // TAMBAHKAN INI
+                startActivity(Intent(requireContext(), ProfileActivity::class.java))
             }
         }
     }

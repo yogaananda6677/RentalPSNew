@@ -27,7 +27,8 @@
             android:background="@drawable/bg_edittext_modern"
             android:hint="Contoh: Coca Cola"
             android:paddingStart="16dp"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:inputType="textCapWords" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -38,13 +39,38 @@
             android:textColor="#64748B"
             android:letterSpacing="0.1"/>
 
-        <Spinner
-            android:id="@+id/spJenisProduk"
+        <RadioGroup
+            android:id="@+id/rgKategoriProduk"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_edittext_modern" />
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbMakanan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Makanan"
+                android:textSize="13sp" />
+
+            <RadioButton
+                android:id="@+id/rbMinuman"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Minuman"
+                android:textSize="13sp" />
+
+            <RadioButton
+                android:id="@+id/rbSnack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Snack"
+                android:textSize="13sp" />
+        </RadioGroup>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,7 +118,7 @@
                     android:textColor="#64748B" />
 
                 <EditText
-                    android:id="@+id/edtStockProduk"
+                    android:id="@+id/edtStokProduk"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:layout_marginTop="6dp"

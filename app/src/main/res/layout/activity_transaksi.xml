@@ -62,12 +62,12 @@
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
-                <Spinner
-                    android:id="@+id/spPilihPs"
-                    android:layout_width="match_parent"
-                    android:layout_height="54dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_input" />
+<!--                <Spinner-->
+<!--                    android:id="@+id/spPilihPs"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="54dp"-->
+<!--                    android:layout_marginTop="12dp"-->
+<!--                    android:background="@drawable/bg_input" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -111,15 +111,12 @@
                     android:hint="Jam Mulai"
                     android:paddingStart="16dp" />
 
-                <EditText
-                    android:id="@+id/edtDurasi"
+                <Spinner
+                    android:id="@+id/spDurasi"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_input"
-                    android:hint="Durasi (Jam)"
-                    android:inputType="number"
-                    android:paddingStart="16dp" />
+                    android:background="@drawable/bg_input" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnHitungSewa"

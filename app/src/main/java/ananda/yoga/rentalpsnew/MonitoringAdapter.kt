@@ -6,142 +6,132 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import ananda.yoga.rentalpsnew.databinding.ItemMonitoringPsBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MonitoringAdapter(
     private val context: Context,
-    private var listData: ArrayList<HashMap<String, String>>
+    private val listData: ArrayList<HashMap<String, String>>
 ) : RecyclerView.Adapter<MonitoringAdapter.ViewHolder>() {
 
     private val handler = Handler(Looper.getMainLooper())
-    private val notifiedPs = HashSet<Int>()
-    private val db = DBOpenHelper(context)
+    private val db      = DBOpenHelper(context)
 
-    inner class ViewHolder(val b: ItemMonitoringPsBinding) :
-        RecyclerView.ViewHolder(b.root) {
-        var countdownRunnable: Runnable? = null
-    }
+    var onPsSelesai: ((idPs: Int) -> Unit)? = null
 
-    // Fungsi untuk memperbarui data dari Fragment
-    fun updateList(newList: ArrayList<HashMap<String, String>>) {
-        this.listData = ArrayList(newList)
-        notifyDataSetChanged()
+    class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        val tvNomorPs   = v.findViewById<TextView>(R.id.tvNomorPs)
+        val tvTipePs    = v.findViewById<TextView>(R.id.tvTipePs)
+        val tvStatus    = v.findViewById<TextView>(R.id.tvStatus)
+        val tvJamSelesai= v.findViewById<TextView>(R.id.tvJamSelesai)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemMonitoringPsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+        val v = LayoutInflater.from(context).inflate(R.layout.item_monitoring_ps, parent, false)
+        return ViewHolder(v)
     }
-
-    override fun getItemCount(): Int = listData.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = listData[position]
-        val idPs = item["id_ps"]?.toIntOrNull() ?: 0
-        val statusPs = item["status_ps"].toString()
-        val jamSelesai = item["jam_selesai"].toString()
+        val item       = listData[position]
+        val status     = item["status_ps"]?.lowercase(Locale.getDefault()) ?: ""
+        val jamSelesai = item["jam_selesai"] ?: "-"
+        val idPs       = item["id_ps"]?.toIntOrNull() ?: 0
 
-        holder.b.tvNomorPs.text = item["nomor_ps"]
-        holder.b.tvTipePs.text = item["nama_tipe"]
-        holder.b.tvJamSelesai.text = if (jamSelesai.isNotEmpty()) "Selesai: $jamSelesai" else "Selesai: -"
+        holder.tvNomorPs.text = item["nomor_ps"]
+        holder.tvTipePs.text  = item["nama_tipe"]
+        holder.tvStatus.text  = status.uppercase(Locale.getDefault())
 
-        // Stop countdown lama
-        holder.countdownRunnable?.let { handler.removeCallbacks(it) }
-
-        when (statusPs.lowercase()) {
+        // Warna badge + teks sesuai status
+        when (status) {
             "tersedia" -> {
-                holder.b.tvStatus.text = "Tersedia"
-                holder.b.tvStatus.setTextColor(Color.parseColor("#16A34A"))
-                holder.b.tvStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#DCFCE7"))
-                holder.b.tvCountdown.text = "READY"
-                holder.b.tvCountdown.setTextColor(Color.parseColor("#94A3B8"))
+                holder.tvStatus.setTextColor(Color.parseColor("#16A34A"))
+                holder.tvStatus.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#F0FDF4"))
             }
             "dipakai" -> {
-                holder.b.tvStatus.text = "Dipakai"
-                holder.b.tvStatus.setTextColor(Color.parseColor("#2563EB"))
-                holder.b.tvStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#EFF6FF"))
-                holder.b.tvCountdown.setTextColor(Color.parseColor("#EF4444"))
-                startCountdown(holder, idPs, jamSelesai)
+                holder.tvStatus.setTextColor(Color.parseColor("#2563EB"))
+                holder.tvStatus.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#EFF6FF"))
+            }
+            "maintenance" -> {
+                holder.tvStatus.setTextColor(Color.parseColor("#EA580C"))
+                holder.tvStatus.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#FFF7ED"))
             }
             else -> {
-                holder.b.tvStatus.text = "Offline"
-                holder.b.tvStatus.setTextColor(Color.parseColor("#EA580C"))
-                holder.b.tvCountdown.text = "--:--:--"
+                holder.tvStatus.setTextColor(Color.parseColor("#64748B"))
+                holder.tvStatus.backgroundTintList =
+                    android.content.res.ColorStateList.valueOf(Color.parseColor("#F1F5F9"))
             }
         }
 
-        holder.b.cardPs.setOnClickListener {
-            if (statusPs.lowercase() == "tersedia") {
-                val intent = Intent(context, TransaksiActivity::class.java)
-                intent.putExtra("id_ps", idPs)
-                intent.putExtra("nomor_ps", item["nomor_ps"])
-                intent.putExtra("nama_tipe", item["nama_tipe"])
+        // Countdown saat dipakai
+        if (status == "dipakai" && jamSelesai != "-" && jamSelesai.isNotEmpty()) {
+            holder.tvJamSelesai.visibility = View.VISIBLE
+            startCountdown(holder.tvJamSelesai, jamSelesai, idPs)
+        } else {
+            holder.tvJamSelesai.visibility = View.GONE
+        }
+
+        // Klik: buka transaksi jika tersedia
+        holder.itemView.setOnClickListener {
+            if (status == "tersedia") {
+                val intent = Intent(context, TransaksiActivity::class.java).apply {
+                    putExtra("ID_PS_TARGET",    item["id_ps"])
+                    putExtra("NOMOR_PS_TARGET", item["nomor_ps"])
+                    putExtra("TIPE_PS_TARGET",  item["nama_tipe"])
+                }
                 context.startActivity(intent)
+            } else {
+                Toast.makeText(context, "Unit PS sedang $status", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun startCountdown(holder: ViewHolder, idPs: Int, jamSelesai: String) {
-        if (jamSelesai.isEmpty()) return
+    private fun startCountdown(tv: TextView, jamSelesai: String, idPs: Int) {
+        tv.textSize = 20f
+        tv.setTypeface(null, android.graphics.Typeface.BOLD)
 
         val runnable = object : Runnable {
             override fun run() {
-                val diff = getDiffMillis(jamSelesai)
-
-                if (diff <= 0) {
-                    if (!notifiedPs.contains(idPs)) {
-                        notifiedPs.add(idPs)
-                        db.updateStatusPs(idPs, "tersedia")
-
-                        // Panggil refresh ke Fragment
-                        val activity = context as? AppCompatActivity
-                        val frag = activity?.supportFragmentManager?.fragments?.find { it is MonitoringFragment } as? MonitoringFragment
-                        frag?.tampilData()
-
-                        Toast.makeText(context, "PS ${holder.b.tvNomorPs.text} Selesai!", Toast.LENGTH_SHORT).show()
+                val sdf      = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val sekarang = Calendar.getInstance()
+                try {
+                    val dateSelesai = sdf.parse(jamSelesai)
+                    if (dateSelesai != null) {
+                        val calSelesai = Calendar.getInstance().apply {
+                            time = dateSelesai
+                            set(Calendar.YEAR,         sekarang.get(Calendar.YEAR))
+                            set(Calendar.MONTH,        sekarang.get(Calendar.MONTH))
+                            set(Calendar.DAY_OF_MONTH, sekarang.get(Calendar.DAY_OF_MONTH))
+                        }
+                        val selisih = calSelesai.timeInMillis - sekarang.timeInMillis
+                        if (selisih > 0) {
+                            val h = (selisih / 3_600_000) % 24
+                            val m = (selisih / 60_000) % 60
+                            val s = (selisih / 1_000) % 60
+                            tv.text = String.format("%02d:%02d:%02d", h, m, s)
+                            handler.postDelayed(this, 1_000)
+                        } else {
+                            tv.text = "00:00:00"
+                            if (idPs > 0) {
+                                db.updateStatusPs(idPs, "tersedia")
+                                handler.post { onPsSelesai?.invoke(idPs) }
+                            }
+                        }
                     }
-                    return
+                } catch (e: Exception) {
+                    tv.text = "00:00:00"
                 }
-
-                val jam = diff / (1000 * 60 * 60)
-                val menit = (diff / (1000 * 60)) % 60
-                val detik = (diff / 1000) % 60
-                holder.b.tvCountdown.text = String.format("%02d:%02d:%02d", jam, menit, detik)
-
-                holder.countdownRunnable = this
-                handler.postDelayed(this, 1000)
             }
         }
         handler.post(runnable)
     }
 
-    private fun getDiffMillis(jamSelesai: String): Long {
-        return try {
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val now = Calendar.getInstance()
-            val end = Calendar.getInstance()
-            val dateSelesai = sdf.parse(jamSelesai) ?: return -1
-
-            val temp = Calendar.getInstance()
-            temp.time = dateSelesai
-
-            end.set(Calendar.HOUR_OF_DAY, temp.get(Calendar.HOUR_OF_DAY))
-            end.set(Calendar.MINUTE, temp.get(Calendar.MINUTE))
-            end.set(Calendar.SECOND, 0)
-
-            if (end.before(now)) return -1
-            end.timeInMillis - now.timeInMillis
-        } catch (e: Exception) { -1 }
-    }
-
-    override fun onViewRecycled(holder: ViewHolder) {
-        super.onViewRecycled(holder)
-        holder.countdownRunnable?.let { handler.removeCallbacks(it) }
-    }
+    override fun getItemCount() = listData.size
 }

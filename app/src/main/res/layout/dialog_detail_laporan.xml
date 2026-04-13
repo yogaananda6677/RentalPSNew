@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Detail Transaksi"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#0F172A" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="10dp"
+        android:background="#E2E8F0" />
+
+    <TextView
+        android:id="@+id/tvDetailPs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PS: - "
+        android:textColor="#475569" />
+
+    <TextView
+        android:id="@+id/tvDetailWaktu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Waktu: - "
+        android:textColor="#475569" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Produk/Tambahan:"
+        android:textStyle="bold"
+        android:textColor="#0F172A" />
+
+    <TextView
+        android:id="@+id/tvDetailProdukList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Tidak ada tambahan produk"
+        android:textColor="#64748B" />
+
+    <TextView
+        android:id="@+id/tvTotalDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="end"
+        android:text="Total: Rp 0"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#2563EB" />
+
+</LinearLayout>

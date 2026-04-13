@@ -73,8 +73,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                         b.edtEmail.error = "Email sudah terdaftar"
                         b.edtEmail.requestFocus()
                     } else {
-                        val hasil = db.insertUser(nama, email, noHp, password)
-
+                        val hasil = db.insertUser(nama, email, noHp, password, "customer")
                         if (hasil) {
                             Toast.makeText(this, "Register berhasil", Toast.LENGTH_SHORT).show()
                             finish()

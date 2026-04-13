@@ -50,15 +50,22 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                     val loginBerhasil = db.checkLogin(email, password)
                     // Di dalam LoginActivity.kt saat loginBerhasil
                     if (loginBerhasil) {
-                        Toast.makeText(this, "Login berhasil", Toast.LENGTH_SHORT).show()
+                        // SIMPAN SESSION
+                        val sharedPref = getSharedPreferences("USER_SESSION", android.content.Context.MODE_PRIVATE)
+                        val editor = sharedPref.edit()
 
+                        // Ambil data nama dari DB berdasarkan email inputan
+                        val userData = db.getUserData(email)
+
+                        editor.putString("userName", userData?.get("nama") ?: "User")
+                        editor.putString("userEmail", email)
+                        editor.apply()
+
+                        Toast.makeText(this, "Login berhasil", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, MainActivity::class.java)
-                        // Hapus Onboarding & Splash dari memori
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
-                        finish() // Matikan LoginActivity
-                    }else {
-                        Toast.makeText(this, "Email atau password salah", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
                 }
             }

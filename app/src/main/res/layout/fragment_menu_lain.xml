@@ -51,34 +51,15 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="20dp">
-
-                    <View
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:background="@drawable/bg_circle_soft"
-                        android:backgroundTint="#F0F7FF" />
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginTop="-50dp"
-                        android:src="@drawable/ic_gamepad"
-                        app:tint="#2563EB" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="Tipe PS"
-                        android:textColor="#334155"
-                        android:textStyle="bold" />
+                    <View android:layout_width="65dp" android:layout_height="65dp" android:background="@drawable/bg_circle_soft" android:backgroundTint="#F0F7FF" />
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_marginTop="-50dp" android:src="@drawable/ic_gamepad" app:tint="#2563EB" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="Tipe PS" android:textColor="#334155" android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -90,36 +71,15 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="20dp">
-
-                    <View
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:background="@drawable/bg_circle_soft"
-                        android:backgroundTint="#F0F7FF" />
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginTop="-50dp"
-                        android:src="@drawable/ic_gamepad"
-                        app:tint="#2563EB" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="PlayStation
-
-"
-                        android:textColor="#334155"
-                        android:textStyle="bold" />
+                    <View android:layout_width="65dp" android:layout_height="65dp" android:background="@drawable/bg_circle_soft" android:backgroundTint="#F0F7FF" />
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_marginTop="-50dp" android:src="@drawable/ic_gamepad" app:tint="#2563EB" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="PlayStation" android:textColor="#334155" android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -131,34 +91,15 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="20dp">
-
-                    <View
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:background="@drawable/bg_circle_soft"
-                        android:backgroundTint="#F0F7FF" />
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginTop="-50dp"
-                        android:src="@drawable/ic_produk"
-                        app:tint="#2563EB" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="Produk"
-                        android:textColor="#334155"
-                        android:textStyle="bold" />
+                    <View android:layout_width="65dp" android:layout_height="65dp" android:background="@drawable/bg_circle_soft" android:backgroundTint="#F0F7FF" />
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_marginTop="-50dp" android:src="@drawable/ic_produk" app:tint="#2563EB" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="Produk" android:textColor="#334155" android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -170,34 +111,35 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="20dp">
+                    <View android:layout_width="65dp" android:layout_height="65dp" android:background="@drawable/bg_circle_soft" android:backgroundTint="#F0F7FF" />
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_marginTop="-50dp" android:src="@drawable/ic_person" app:tint="#2563EB" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="User" android:textColor="#334155" android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                    <View
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:background="@drawable/bg_circle_soft"
-                        android:backgroundTint="#F0F7FF" />
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_marginTop="-50dp"
-                        android:src="@drawable/ic_person"
-                        app:tint="#2563EB" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="User"
-                        android:textColor="#334155"
-                        android:textStyle="bold" />
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardProfile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <View android:layout_width="65dp" android:layout_height="65dp" android:background="@drawable/bg_circle_soft" android:backgroundTint="#F0F7FF" />
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_marginTop="-50dp" android:src="@drawable/ic_person" app:tint="#2563EB" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="Profile" android:textColor="#334155" android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
