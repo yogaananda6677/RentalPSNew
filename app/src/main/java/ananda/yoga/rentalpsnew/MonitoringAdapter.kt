@@ -71,9 +71,11 @@ class MonitoringAdapter(
         }
 
         // Countdown saat dipakai
+        val idTransaksi = item["id_transaksi"]?.toIntOrNull() ?: 0
+
         if (status == "dipakai" && jamSelesai != "-" && jamSelesai.isNotEmpty()) {
             holder.tvJamSelesai.visibility = View.VISIBLE
-            startCountdown(holder.tvJamSelesai, jamSelesai, idPs)
+            startCountdown(holder.tvJamSelesai, jamSelesai, idPs, idTransaksi)
         } else {
             holder.tvJamSelesai.visibility = View.GONE
         }
@@ -93,35 +95,50 @@ class MonitoringAdapter(
         }
     }
 
-    private fun startCountdown(tv: TextView, jamSelesai: String, idPs: Int) {
+    private fun startCountdown(
+        tv: TextView,
+        jamSelesai: String,
+        idPs: Int,
+        idTransaksi: Int
+    ) {
         tv.textSize = 20f
         tv.setTypeface(null, android.graphics.Typeface.BOLD)
 
         val runnable = object : Runnable {
             override fun run() {
-                val sdf      = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
                 val sekarang = Calendar.getInstance()
+
                 try {
                     val dateSelesai = sdf.parse(jamSelesai)
                     if (dateSelesai != null) {
                         val calSelesai = Calendar.getInstance().apply {
                             time = dateSelesai
-                            set(Calendar.YEAR,         sekarang.get(Calendar.YEAR))
-                            set(Calendar.MONTH,        sekarang.get(Calendar.MONTH))
+                            set(Calendar.YEAR, sekarang.get(Calendar.YEAR))
+                            set(Calendar.MONTH, sekarang.get(Calendar.MONTH))
                             set(Calendar.DAY_OF_MONTH, sekarang.get(Calendar.DAY_OF_MONTH))
                         }
+
                         val selisih = calSelesai.timeInMillis - sekarang.timeInMillis
+
                         if (selisih > 0) {
                             val h = (selisih / 3_600_000) % 24
                             val m = (selisih / 60_000) % 60
                             val s = (selisih / 1_000) % 60
                             tv.text = String.format("%02d:%02d:%02d", h, m, s)
-                            handler.postDelayed(this, 1_000)
+                            handler.postDelayed(this, 1000)
                         } else {
-                            tv.text = "00:00:00"
-                            if (idPs > 0) {
-                                db.updateStatusPs(idPs, "tersedia")
+                            val lunas = db.isTransaksiLunas(idTransaksi)
+
+                            if (lunas) {
+                                tv.text = "SELESAI"
+                                if (idPs > 0) db.updateStatusPs(idPs, "tersedia")
+                                if (idTransaksi > 0) db.selesaikanTransaksi(idTransaksi)
                                 handler.post { onPsSelesai?.invoke(idPs) }
+                            } else {
+                                tv.text = "WAKTU HABIS - BELUM LUNAS"
+                                tv.setTextColor(Color.parseColor("#DC2626"))
+                                handler.postDelayed(this, 1000)
                             }
                         }
                     }
@@ -130,6 +147,7 @@ class MonitoringAdapter(
                 }
             }
         }
+
         handler.post(runnable)
     }
 
