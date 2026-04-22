@@ -46,7 +46,6 @@ class MonitoringAdapter(
         holder.tvTipePs.text  = item["nama_tipe"]
         holder.tvStatus.text  = status.uppercase(Locale.getDefault())
 
-        // Warna badge + teks sesuai status
         when (status) {
             "tersedia" -> {
                 holder.tvStatus.setTextColor(Color.parseColor("#16A34A"))
@@ -70,7 +69,6 @@ class MonitoringAdapter(
             }
         }
 
-        // Countdown saat dipakai
         val idTransaksi = item["id_transaksi"]?.toIntOrNull() ?: 0
 
         if (status == "dipakai" && jamSelesai != "-" && jamSelesai.isNotEmpty()) {
@@ -80,7 +78,6 @@ class MonitoringAdapter(
             holder.tvJamSelesai.visibility = View.GONE
         }
 
-        // Klik: buka transaksi jika tersedia
         holder.itemView.setOnClickListener {
             if (status == "tersedia") {
                 val intent = Intent(context, TransaksiActivity::class.java).apply {

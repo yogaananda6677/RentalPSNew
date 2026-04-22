@@ -30,20 +30,17 @@ class TipePsActivity : AppCompatActivity(), View.OnClickListener {
 
         db = DBOpenHelper(this)
 
-        // Penyesuaian Padding System Bar agar tidak tertutup header
         ViewCompat.setOnApplyWindowInsetsListener(b.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
-        // Listener Tombol
         b.ivBack.setOnClickListener(this)
         b.btnTambah.setOnClickListener(this)
 
         tampilData()
 
-        // Klik untuk Edit
         b.listView.setOnItemClickListener { _, _, position, _ ->
             val item = listData[position]
             showDialogEdit(
@@ -53,7 +50,6 @@ class TipePsActivity : AppCompatActivity(), View.OnClickListener {
             )
         }
 
-        // Long Klik untuk Hapus
         b.listView.onItemLongClickListener =
             AdapterView.OnItemLongClickListener { _, _, position, _ ->
                 val item = listData[position]
@@ -90,7 +86,7 @@ class TipePsActivity : AppCompatActivity(), View.OnClickListener {
         val adapter = SimpleAdapter(
             this,
             listData,
-            R.layout.item_tipe_ps, // <--- UBAH BARIS INI (Wajib!)
+            R.layout.item_tipe_ps,
             arrayOf("nama_tipe"),
             intArrayOf(R.id.text1)
         )
@@ -105,7 +101,6 @@ class TipePsActivity : AppCompatActivity(), View.OnClickListener {
             )
         }
 
-        // Logic Klik Lama untuk Hapus (Tetap ada)
         b.listView.onItemLongClickListener =
             AdapterView.OnItemLongClickListener { _, _, position, _ ->
                 val item = listData[position]
@@ -129,21 +124,17 @@ class TipePsActivity : AppCompatActivity(), View.OnClickListener {
     private fun showDialogTambah() {
         val view = layoutInflater.inflate(R.layout.dialog_tipe_ps, null)
 
-        // Inisialisasi AutoCompleteTextView
         val edtNama = view.findViewById<android.widget.AutoCompleteTextView>(R.id.etNamaTipe)
         val edtHarga = view.findViewById<android.widget.EditText>(R.id.etHargaSewa)
 
-        // Daftar saran yang akan muncul
         val saranTipe = arrayOf("PS 2", "PS 3", "PS 4", "PS 4 Pro", "PS 5")
 
-        // Buat Adapter untuk AutoComplete
         val adapterSaran = android.widget.ArrayAdapter(
             this,
             android.R.layout.simple_dropdown_item_1line,
             saranTipe
         )
 
-        // Pasang adapter ke view
         edtNama.setAdapter(adapterSaran)
 
         AlertDialog.Builder(this)

@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- Judul -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +14,6 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <!-- Total tagihan -->
     <TextView
         android:id="@+id/tvTotalDialog"
         android:layout_width="match_parent"
@@ -26,7 +24,6 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <!-- Pilih Metode Pembayaran -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +57,6 @@
             android:textSize="15sp" />
     </RadioGroup>
 
-    <!-- Input uang bayar (muncul hanya untuk Cash, tapi tetap ada untuk validasi) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -81,7 +77,6 @@
         android:background="@drawable/bg_input"
         android:layout_marginBottom="12dp" />
 
-    <!-- Kembalian (real-time) -->
     <TextView
         android:id="@+id/tvKembalianDialog"
         android:layout_width="match_parent"
@@ -92,7 +87,6 @@
         android:gravity="center"
         android:layout_marginBottom="20dp" />
 
-    <!-- Tombol Bayar -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnHitungKembali"
         android:layout_width="match_parent"

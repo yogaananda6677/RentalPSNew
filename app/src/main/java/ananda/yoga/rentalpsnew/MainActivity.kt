@@ -1,14 +1,17 @@
 package ananda.yoga.rentalpsnew
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import ananda.yoga.rentalpsnew.databinding.ActivityMainBinding
-import android.content.Intent
-import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var b: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,18 +20,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction().replace(R.id.frame_layout, DashboardFragment()).commit()
+            replaceFragment(DashboardFragment())
         }
 
         b.bottomNavigationView.setOnItemSelectedListener { item ->
-            val frag = when (item.itemId) {
-                R.id.itemHome -> DashboardFragment()
-                R.id.monitoring -> MonitoringFragment()
-                R.id.riwayat -> RiwayatFragment()
-                R.id.menuLain -> MenuLainFragment()
-                else -> null
+            when (item.itemId) {
+                R.id.itemHome -> replaceFragment(DashboardFragment())
+                R.id.monitoring -> replaceFragment(MonitoringFragment())
+                R.id.riwayat -> replaceFragment(RiwayatFragment())
+                R.id.menuLain -> replaceFragment(MenuLainFragment())
             }
-            frag?.let { supportFragmentManager.beginTransaction().replace(R.id.frame_layout, it).commit() }
             true
         }
 
@@ -39,7 +40,11 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frame_layout, fragment)
+            .commit()
+    }
 
     private fun showExitDialog() {
         val builder = AlertDialog.Builder(this)
@@ -52,5 +57,26 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
         builder.show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.dashboard_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_profil -> {
+                startActivity(Intent(this, ProfileActivity::class.java))
+                true
+            }
+
+            R.id.menu_keluar -> {
+                showExitDialog()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

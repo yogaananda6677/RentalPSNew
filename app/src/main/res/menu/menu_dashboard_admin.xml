@@ -6,10 +6,6 @@
         android:title="Profile Admin" />
 
     <item
-        android:id="@+id/menu_tentang"
-        android:title="Tentang Aplikasi" />
-
-    <item
         android:id="@+id/menu_logout"
         android:title="Logout" />
 

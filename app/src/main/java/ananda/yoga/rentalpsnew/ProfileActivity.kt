@@ -59,13 +59,10 @@ class ProfileActivity : AppCompatActivity() {
             b.imgProfile.setImageResource(R.drawable.ic_person)
         }
 
-        // Tombol kembali
         b.ivBack.setOnClickListener { finish() }
 
-        // Edit foto
         b.btnEditFoto.setOnClickListener { getImage.launch("image/*") }
 
-        // Logout
         b.btnLogout.setOnClickListener {
             sp.edit().clear().apply()
             val intent = Intent(this, LoginActivity::class.java).apply {

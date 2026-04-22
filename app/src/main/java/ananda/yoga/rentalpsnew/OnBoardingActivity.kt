@@ -19,14 +19,12 @@ class OnBoardingActivity : AppCompatActivity(), View.OnClickListener {
         b = ActivityOnBoardingBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        // insets (biar aman notch / status bar)
         ViewCompat.setOnApplyWindowInsetsListener(b.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // set click listener ke tombol
         b.btnLogin.setOnClickListener(this)
         b.btnRegister.setOnClickListener(this)
     }

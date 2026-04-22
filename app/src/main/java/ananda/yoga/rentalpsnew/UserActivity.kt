@@ -79,7 +79,7 @@ class UserActivity : AppCompatActivity() {
                                 }
                                 true
                             }
-                            popup.show() // Penting: Agar menu muncul
+                            popup.show()
                         }
                         true
                     }

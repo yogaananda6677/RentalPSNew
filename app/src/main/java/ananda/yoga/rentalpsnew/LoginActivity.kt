@@ -48,13 +48,10 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                     b.edtPassword.requestFocus()
                 } else {
                     val loginBerhasil = db.checkLogin(email, password)
-                    // Di dalam LoginActivity.kt saat loginBerhasil
                     if (loginBerhasil) {
-                        // SIMPAN SESSION
                         val sharedPref = getSharedPreferences("USER_SESSION", android.content.Context.MODE_PRIVATE)
                         val editor = sharedPref.edit()
 
-                        // Ambil data nama dari DB berdasarkan email inputan
                         val userData = db.getUserData(email)
 
                         editor.putString("userName", userData?.get("nama") ?: "User")
@@ -71,8 +68,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             R.id.tvRegister -> {
-                // Pindah ke Register tanpa finish()
-                // supaya user bisa balik ke Login jika batal daftar
                 startActivity(Intent(this, RegisterActivity::class.java))
             }
 

@@ -71,9 +71,6 @@ class DBOpenHelper(context: Context) : SQLiteOpenHelper(context, "rental_ps.db",
         onCreate(db)
     }
 
-    // =========================================================================
-    // 1. AUTH & USER
-    // =========================================================================
     fun checkLogin(e: String, p: String): Boolean {
         val c = readableDatabase.rawQuery(
             "SELECT * FROM user WHERE email=? AND password=?",
@@ -160,9 +157,7 @@ class DBOpenHelper(context: Context) : SQLiteOpenHelper(context, "rental_ps.db",
         return writableDatabase.delete("user", "id_user=?", arrayOf(id.toString())) > 0
     }
 
-    // =========================================================================
-    // 2. PLAYSTATION & MONITORING
-    // =========================================================================
+
     fun getMonitoringPs(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
         val sql = """
@@ -254,9 +249,6 @@ class DBOpenHelper(context: Context) : SQLiteOpenHelper(context, "rental_ps.db",
         return writableDatabase.delete("playstation", "id_ps=?", arrayOf(id.toString())) > 0
     }
 
-    // =========================================================================
-    // 3. TIPE PS & PRODUK
-    // =========================================================================
     fun getAllTipePs(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
         val c = readableDatabase.rawQuery("SELECT * FROM tipe_ps", null)
@@ -360,9 +352,6 @@ class DBOpenHelper(context: Context) : SQLiteOpenHelper(context, "rental_ps.db",
         return writableDatabase.delete("produk", "id_produk=?", arrayOf(id.toString())) > 0
     }
 
-    // =========================================================================
-    // 4. TRANSAKSI
-    // =========================================================================
     fun insertTransaksi(idU: Int, tgl: String, total: Double, status: String): Long {
         if (total <= 0) return -1L
 
@@ -518,9 +507,6 @@ class DBOpenHelper(context: Context) : SQLiteOpenHelper(context, "rental_ps.db",
         return list
     }
 
-    // =========================================================================
-    // 5. RIWAYAT, LAPORAN, DASHBOARD
-    // =========================================================================
     fun getAllRiwayatTransaksi(): ArrayList<HashMap<String, String>> {
         val list = ArrayList<HashMap<String, String>>()
         val sql = """

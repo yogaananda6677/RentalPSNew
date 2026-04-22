@@ -40,7 +40,6 @@ class MonitoringFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // *** FILTER "dipakai" sudah sinkron dengan status di DB dan TransaksiActivity ***
         b.btnFilterAll.setOnClickListener         { ubahStatusFilter("semua",       it as Button) }
         b.btnFilterTersedia.setOnClickListener    { ubahStatusFilter("tersedia",    it as Button) }
         b.btnFilterDipakai.setOnClickListener     { ubahStatusFilter("dipakai",     it as Button) }

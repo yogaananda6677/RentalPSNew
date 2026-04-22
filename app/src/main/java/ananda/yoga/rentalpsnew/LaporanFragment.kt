@@ -29,7 +29,6 @@ class LaporanFragment : Fragment(R.layout.fragment_laporan) {
 
         b.rvLaporan.layoutManager = LinearLayoutManager(requireContext())
 
-        // Tampilkan data hari ini secara default
         val hariIni = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         b.edtPilihTanggal.setText(hariIni)
         loadDataHarian(hariIni)

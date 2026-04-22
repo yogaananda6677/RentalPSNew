@@ -132,7 +132,6 @@ class PlaystationActivity : AppCompatActivity() {
 
         edtNomor.setText(item["nomor_ps"])
 
-        // Cari posisi tipe PS yang sedang diedit
         val posTipe = listTipe.indexOfFirst { it["id_tipe"] == item["id_tipe"] }
         if (posTipe >= 0) spTipe.setSelection(posTipe)
 

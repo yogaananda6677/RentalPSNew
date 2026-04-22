@@ -55,7 +55,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         b.tvPendapatanHariIni.text = rupiahFmt(pendapatanHariIni)
         setupLineChart()
     }
-
     private fun setupLineChart() {
         val data7Hari = db.getPendapatan7Hari()
 
@@ -79,10 +78,10 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         val dataSet = LineDataSet(entries, "Pendapatan (Rp)").apply {
             color = Color.parseColor("#2563EB")
             setCircleColor(Color.parseColor("#2563EB"))
-            circleRadius = 5f
-            circleHoleRadius = 3f
+            circleRadius = 4f
+            circleHoleRadius = 2f
             circleHoleColor = Color.WHITE
-            lineWidth = 2.5f
+            lineWidth = 2f
             setDrawValues(false)
             mode = LineDataSet.Mode.CUBIC_BEZIER
             setDrawFilled(true)
@@ -94,36 +93,46 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         b.lineChart.clear()
         b.lineChart.data = LineData(dataSet)
 
-        b.lineChart.description.isEnabled = false
-        b.lineChart.legend.isEnabled = false
-        b.lineChart.setTouchEnabled(true)
-        b.lineChart.setPinchZoom(false)
-        b.lineChart.setScaleEnabled(false)
-        b.lineChart.setDrawGridBackground(false)
-        b.lineChart.setBackgroundColor(Color.TRANSPARENT)
+        b.lineChart.apply {
+            description.isEnabled = false
+            legend.isEnabled = false
+            setTouchEnabled(true)
+            setPinchZoom(false)
+            setScaleEnabled(false)
+            setDrawGridBackground(false)
+            setBackgroundColor(Color.TRANSPARENT)
 
-        b.lineChart.xAxis.apply {
-            valueFormatter = IndexAxisValueFormatter(labels)
-            position = XAxis.XAxisPosition.BOTTOM
-            granularity = 1f
-            labelCount = labels.size
-            setDrawGridLines(false)
-            textColor = Color.parseColor("#94A3B8")
-            textSize = 11f
+            minOffset = 8f
+            extraTopOffset = 8f
+            extraBottomOffset = 12f
+            extraLeftOffset = 8f
+            extraRightOffset = 8f
+
+            xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(labels)
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                setDrawGridLines(false)
+                setAvoidFirstLastClipping(true)
+                textColor = Color.parseColor("#94A3B8")
+                textSize = 9f
+            }
+
+            axisLeft.apply {
+                setDrawGridLines(true)
+                gridColor = Color.parseColor("#F1F5F9")
+                textColor = Color.parseColor("#94A3B8")
+                textSize = 9f
+                axisMinimum = 0f
+                setDrawTopYLabelEntry(false)
+            }
+
+            axisRight.isEnabled = false
+
+            animateX(800, Easing.EaseInOutCubic)
+            notifyDataSetChanged()
+            invalidate()
         }
-
-        b.lineChart.axisLeft.apply {
-            setDrawGridLines(true)
-            gridColor = Color.parseColor("#F1F5F9")
-            textColor = Color.parseColor("#94A3B8")
-            textSize = 10f
-            axisMinimum = 0f
-        }
-
-        b.lineChart.axisRight.isEnabled = false
-        b.lineChart.animateX(800, Easing.EaseInOutCubic)
-        b.lineChart.notifyDataSetChanged()
-        b.lineChart.invalidate()
     }
 
     private fun showPopupMenu(anchor: View) {
